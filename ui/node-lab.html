@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>节点实验室 · LiteGraph 交互 + 原版外观</title>
+<link rel="stylesheet" href="vendor/litegraph.css">
+<script src="vendor/litegraph.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #f2f4f8;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; }
+  #bar {
+    height: 46px; display: flex; align-items: center; gap: 14px; padding: 0 18px;
+    background: rgba(255,255,255,.82); backdrop-filter: blur(14px);
+    color: #3c4250; font-size: 13px; border-bottom: 1px solid #e6e9ef;
+  }
+  #bar b { color: #1f2430; font-size: 14px; }
+  #bar .sp { flex: 1; }
+  #bar .tip { color: #98a1b2; font-size: 12px; }
+  #bar button {
+    height: 28px; padding: 0 12px; border-radius: 7px; cursor: pointer;
+    background: #fff; color: #3c4250; border: 1px solid #dfe3ea; font-size: 12px;
+  }
+  #bar button:hover { background: #f6f7f9; border-color: #c9ced8; }
+  #cv { position: absolute; left: 0; top: 46px; width: 100%; height: calc(100% - 46px); display: block; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <b>节点实验室</b>
+  <span class="tip">LiteGraph 交互内核 · 节点外观按原版自绘 · 双击改台词 · 右键菜单</span>
+  <span class="sp"></span>
+  <button id="btnJson">导出 JSON</button>
+  <button id="btnReset">重置示例</button>
+</div>
+<canvas id="cv"></canvas>
+
+<script>
+(function () {
+  'use strict';
+  var L = window.LiteGraph;
+
+  /* ================= 配色（跟主界面一套） ================= */
+  var C = {
+    bg: '#f2f4f8',
+    grid: '#e4e8ef',
+    card: '#ffffff',
+    line: '#e6e9ef',
+    lineSel: '#4f46e5',
+    txt: '#1f2430',
+    txt2: '#6b7280',
+    txt3: '#9aa2b1',
+    soft: '#f7f8fa',
+    thumb1: '#2b3a55',
+    thumb2: '#16202f'
+  };
+  var KIND = {
+    start: { label: '序章', dot: '#2563eb' },
+    scene: { label: '场景', dot: '#059669' },
+    choice: { label: '分支', dot: '#d97706' },
+    ending: { label: '结局', dot: '#dc2626' }
+  };
+
+  L.NODE_TITLE_COLOR = C.txt2;
+  L.NODE_SELECTED_TITLE_COLOR = C.lineSel;
+  L.NODE_TEXT_COLOR = C.txt;
+  L.NODE_DEFAULT_COLOR = C.soft;
+  L.NODE_DEFAULT_BGCOLOR = C.card;
+  L.LINK_COLOR = '#c2c8d4';
+  L.EVENT_LINK_COLOR = C.lineSel;
+  L.CONNECTING_LINK_COLOR = C.lineSel;
+  L.NODE_DEFAULT_BOXCOLOR = 'transparent';
+  // 端口和连线都用灰色，别用 LiteGraph 默认的绿
+  if (L.LGraphCanvas && L.LGraphCanvas.link_type_colors) {
+    L.LGraphCanvas.link_type_colors['gal'] = '#b3bac7';
+  }
+
+  function rr(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  /* ================= 节点：has_headers=false，整张卡片自己画 ================= */
+  var NODE_W = 300;
+
+  function makeNodeType(kind, outs, hasInput) {
+    function Node() {
+      // 保留标题栏但画成白色：这样端口位置回到中间，标题栏视觉上是卡片的一部分
+      this.color = 'rgba(255,255,255,0)';
+      this.boxcolor = 'transparent';
+      this.shape = L.ROUND_SHAPE;
+      this.title = '';
+      if (hasInput !== false) this.addInput('', 'gal');
+      for (var i = 0; i < outs; i++) this.addOutput('', 'gal');
+      this.properties = { kind: kind, idx: '', title: '', text: '', bg: '雨夜', endKind: '真结局', dur: 3.5 };
+      this.size = [NODE_W, 152];
+    }
+    Node.title = KIND[kind].label;
+    Node.prototype.onGetTitle = function () { return ''; };
+
+    Node.prototype.onDrawBackground = function (ctx, canvas) {
+      var w = this.size[0], h = this.size[1];
+      var sel = this.flags && this.flags.selected;
+      var p = this.properties;
+
+      // 卡片底
+      ctx.save();
+      ctx.shadowColor = 'rgba(16,24,40,.10)';
+      ctx.shadowBlur = sel ? 18 : 10;
+      ctx.shadowOffsetY = sel ? 6 : 3;
+      ctx.fillStyle = C.card;
+      rr(ctx, 0, 0, w, h, 10);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.strokeStyle = sel ? C.lineSel : C.line;
+      ctx.lineWidth = sel ? 2 : 1;
+      rr(ctx, 0.5, 0.5, w - 1, h - 1, 10);
+      ctx.stroke();
+
+      // 顶部：序号 + 标题 + 类型标签
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = C.txt3;
+      ctx.font = '11px "Microsoft YaHei", sans-serif';
+      ctx.fillText(p.idx || '00', 12, 20);
+
+      ctx.fillStyle = C.txt;
+      ctx.font = '13px "Microsoft YaHei", sans-serif';
+      ctx.fillText(p.title || '未命名', 38, 20);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = C.txt3;
+      ctx.font = '11px "Microsoft YaHei", sans-serif';
+      ctx.fillText(KIND[kind].label, w - 20, 20);
+      ctx.textAlign = 'left';
+
+      // 缩略图（左）+ 角色框（右）
+      var ty = 34, th = 56, tw = 178;
+      var grad = ctx.createLinearGradient(12, ty, 12 + tw, ty + th);
+      grad.addColorStop(0, C.thumb1);
+      grad.addColorStop(1, C.thumb2);
+      ctx.fillStyle = grad;
+      rr(ctx, 12, ty, tw, th, 6);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255,255,255,.82)';
+      ctx.font = '11px "Microsoft YaHei", sans-serif';
+      ctx.fillText('bg ' + (p.bg || '雨夜'), 20, ty + 14);
+
+      ctx.fillStyle = C.soft;
+      rr(ctx, 12 + tw + 8, ty, w - tw - 32, th, 6);
+      ctx.fill();
+      ctx.strokeStyle = C.line;
+      ctx.lineWidth = 1;
+      rr(ctx, 12 + tw + 8, ty, w - tw - 32, th, 6);
+      ctx.stroke();
+      ctx.fillStyle = C.txt3;
+      ctx.font = '10px "Microsoft YaHei", sans-serif';
+      ctx.fillText('char', 12 + tw + 18, ty + 14);
+
+      // 台词
+      ctx.fillStyle = p.text ? C.txt : C.txt3;
+      ctx.font = '12px "Microsoft YaHei", sans-serif';
+      var txt = p.text || '双击写台词…';
+      var maxW = w - 24;
+      if (ctx.measureText(txt).width > maxW) {
+        while (txt.length > 1 && ctx.measureText(txt + '…').width > maxW) txt = txt.slice(0, -1);
+        txt += '…';
+      }
+      ctx.fillText(txt, 12, ty + th + 18);
+
+      // 底部：时长 + 波形
+      ctx.fillStyle = C.txt3;
+      ctx.font = '10.5px "Microsoft YaHei", sans-serif';
+      var dur = (kind === 'ending' ? p.endKind : (p.dur || 3.5) + 's');
+      ctx.fillText('◷ ' + dur, 12, h - 14);
+
+      // 小波形
+      var wx = 78;
+      for (var i = 0; i < 18; i++) {
+        var bh = 3 + ((i * 37) % 9);
+        ctx.fillStyle = '#d8dde6';
+        ctx.fillRect(wx + i * 3, h - 14 - bh / 2, 2, bh);
+      }
+    };
+
+    Node.prototype.onDblClick = function () {
+      var v = window.prompt('台词', this.properties.text || '');
+      if (v !== null) {
+        this.properties.text = v;
+        this.setDirtyCanvas(true, true);
+      }
+    };
+
+    Node.prototype.onDrawForeground = function () {
+      // 侧向端口标签（跟原来一样，hover 才显）
+      if (this.flags.collapsed) return;
+    };
+
+    return Node;
+  }
+
+  L.registerNodeType('galgame/start', makeNodeType('start', 1, false));
+  L.registerNodeType('galgame/scene', makeNodeType('scene', 1, true));
+  L.registerNodeType('galgame/choice', makeNodeType('choice', 3, true));
+  L.registerNodeType('galgame/ending', makeNodeType('ending', 0, true));
+
+  /* ================= 画布 ================= */
+  function makeGrid(size, color) {
+    var c = document.createElement('canvas');
+    c.width = c.height = size;
+    var g = c.getContext('2d');
+    g.strokeStyle = color;
+    g.lineWidth = 1;
+    g.beginPath(); g.moveTo(0.5, 0); g.lineTo(0.5, size); g.stroke();
+    g.beginPath(); g.moveTo(0, 0.5); g.lineTo(size, 0.5); g.stroke();
+    return c.toDataURL();
+  }
+
+  var graph = new LGraph();
+  var canvasEl = document.getElementById('cv');
+  var canvas = new LGraphCanvas(canvasEl, graph);
+  canvas.clear_background_color = C.bg;
+  canvas.background_image = makeGrid(24, C.grid);
+  canvas.render_connection_arrows = false;
+  canvas.render_canvas_border = false;
+  canvas.render_connections_shadows = false;
+  canvas.links_render_mode = L.SPLINE_LINK;
+  canvas.default_link_color = '#b3bac7';
+  canvas.show_info = false;
+  canvas.ds.max_scale = 2.5;
+  canvas.ds.min_scale = 0.25;
+
+  var seq = 0;
+  function mk(type, x, y, title, text, sub) {
+    var n = L.createNode(type);
+    n.pos = [x, y];
+    seq += 1;
+    n.properties.idx = String(seq).padStart(2, '0');
+    n.properties.title = title;
+    if (text != null) n.properties.text = text;
+    if (sub) {
+      if (n.properties.kind === 'ending') n.properties.endKind = sub;
+      else n.properties.bg = sub;
+    }
+    graph.add(n);
+    return n;
+  }
+
+  function buildSample() {
+    graph.clear();
+    seq = 0;
+    var a = mk('galgame/start', 60, 250, '序章 · 雨', '十一点四十分，天台的门没锁。', '雨夜');
+    var b = mk('galgame/scene', 400, 250, '天台 · 她先到了', '你迟到了七分钟。', '雨夜');
+    var c = mk('galgame/choice', 740, 250, '两张车票', '票我买好了。你要走吗？', '雨夜');
+    var d = mk('galgame/scene', 1080, 120, '沉默的三十秒', '她没说话，把票塞进我手里。', '雨夜');
+    var e = mk('galgame/scene', 1080, 390, '楼梯间的回声', '那我把票退了。', '黄昏');
+    var f = mk('galgame/ending', 1420, 120, '真结局 · 雨停之前', '我们谁都没有回头。', '真结局');
+    var g = mk('galgame/ending', 1420, 390, '坏结局 · 留在原地', '雨一直下到天亮。', '坏结局');
+
+    a.connect(0, b, 0);
+    b.connect(0, c, 0);
+    c.connect(0, d, 0);
+    c.connect(1, e, 0);
+    d.connect(0, f, 0);
+    e.connect(0, g, 0);
+  }
+
+  buildSample();
+
+  function fitCanvas() {
+    var w = canvasEl.clientWidth || canvasEl.offsetWidth;
+    var h = canvasEl.clientHeight || canvasEl.offsetHeight;
+    if (!w || !h) return;
+    canvasEl.width = w;
+    canvasEl.height = h;
+    if (typeof canvas.resize === 'function') canvas.resize(w, h);
+  }
+
+  fitCanvas();
+  canvas.setZoom(0.74);
+  canvas.centerOnNode(graph._nodes[2]);
+  window.addEventListener('resize', function () { fitCanvas(); canvas.centerOnNode(graph._nodes[2]); });
+  graph.start();
+
+  /* ================= 导出 ================= */
+  function toGalGraph() {
+    var out = { version: 1, nodes: [], edges: [] };
+    graph._nodes.forEach(function (n) {
+      var kind = n.properties.kind;
+      var o = {
+        id: 'n' + n.id,
+        type: kind,
+        title: n.properties.title || '',
+        pos: { x: Math.round(n.pos[0]), y: Math.round(n.pos[1]) },
+        lines: [{ who: '', text: n.properties.text || '' }]
+      };
+      if (kind === 'ending') {
+        o.end_kind = n.properties.endKind === '真结局' ? 'true'
+          : n.properties.endKind === '坏结局' ? 'bad' : 'alt';
+      }
+      out.nodes.push(o);
+    });
+    graph._nodes.forEach(function (n) {
+      (n.outputs || []).forEach(function (slot, k) {
+        (slot.links || []).forEach(function (lid) {
+          var link = graph.links[lid];
+          if (!link) return;
+          out.edges.push({ id: 'e' + lid, from: 'n' + link.origin_id, port: k, to: 'n' + link.target_id });
+        });
+      });
+    });
+    return out;
+  }
+
+  document.getElementById('btnJson').addEventListener('click', function () {
+    var g = toGalGraph();
+    console.log(JSON.stringify(g, null, 2));
+    try { localStorage.setItem('gal_lab_graph', JSON.stringify(g)); } catch (e) {}
+    alert('已导出：' + g.nodes.length + ' 节点 / ' + g.edges.length + ' 连线');
+  });
+  document.getElementById('btnReset').addEventListener('click', function () {
+    buildSample(); graph.start();
+  });
+
+  setTimeout(function () {
+    var g = toGalGraph();
+    document.title = 'LABREADY ' + JSON.stringify({
+      nodes: g.nodes.length, edges: g.edges.length,
+      types: g.nodes.map(function (n) { return n.type; })
+    });
+  }, 700);
+})();
+</script>
+</body>
+</html>

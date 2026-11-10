@@ -1,0 +1,5 @@
+{
+ "all": "{\"nodes\":40,\"chapters\":3,\"xMin\":260,\"xMax\":3660,\"yMin\":280,\"yMax\":1930,\"nodeRows\":0,\"chapterRows\":3}",
+ "chapter": "{\"nodes\":40,\"chapter\":\"c01\",\"visible\":{\"chapter\":\"c01\",\"nodes\":14,\"links\":13,\"totalNodes\":40},\"domNodes\":0}",
+ "fitlog": "{\"w\":1109,\"h\":826,\"gw\":3820,\"gh\":482,\"want\":\"0.29 / 1.714\",\"scale\":0.2903,\"minX\":260,\"minY\":280,\"maxX\":3960,\"maxY\":642,\"n\":14,\"ok\":true,\"finalScale\":0.2903}"
+}

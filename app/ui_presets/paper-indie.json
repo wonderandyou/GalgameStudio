@@ -1,0 +1,41 @@
+{
+  "id": "paper-indie",
+  "name": "明亮 indie",
+  "vibe": "米白左文右图斜切，编号菜单，干净现代",
+  "keywords": [
+    "清新", "明亮", "校园", "治愈", "青春", "轻小说",
+    "手帐", "干净", "纯爱", "日常", "甜", "白底", "现代", "轻松", "小清新", "学生"
+  ],
+  "fit": ["校园", "纯爱", "治愈", "轻松日常"],
+  "palette": {
+    "bg": "#f7f5f0",
+    "fg": "#23201c",
+    "accent": "#b8443a",
+    "muted": "#8a7f6e",
+    "panel": "#fdfcf9"
+  },
+  "typeface": {
+    "title": "sans",
+    "body": "sans",
+    "mono": "mono"
+  },
+  "layout": {
+    "menu": "numbered",
+    "title_align": "left",
+    "title_size": 88,
+    "title_weight": 800,
+    "letter_spacing": "0.03em",
+    "skew": "0deg",
+    "show_characters": false,
+    "character_opacity": 0,
+    "seal": false
+  },
+  "surfaces": {
+    "dialog": {"bg": "rgba(253,252,249,.95)", "fg": "#23201c", "border": "1px solid rgba(35,32,28,.14)", "radius": "6px", "height": "28%"},
+    "choice": {"bg": "rgba(253,252,249,.98)", "fg": "#33302b", "hover": "rgba(184,68,58,.08)", "border": "1px solid rgba(35,32,28,.16)", "radius": "5px"},
+    "save": {"bg": "#fdfcf9", "fg": "#33302b", "accent": "#b8443a"},
+    "settings": {"bg": "#fdfcf9", "fg": "#33302b", "accent": "#b8443a"},
+    "hud": {"bg": "rgba(253,252,249,.90)", "fg": "#6d6355", "height": "88px"}
+  },
+  "notes": "右侧配图用 clip-path 斜切（polygon 22% 0 → 100% 0 → 100% 100% → 0 100%）；右下角圆形按钮在深色图上必须加白色描边阴影。"
+}

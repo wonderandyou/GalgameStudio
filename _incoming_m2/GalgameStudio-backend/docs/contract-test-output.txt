@@ -1,0 +1,5 @@
+PASS 1098 graph combinations: node_count 4..64, branch_depth 0..8, auto_voice true/false
+PASS cycle rejection
+PASS edge/choice mismatch rejection
+PASS PNG structure, CRC and pixel buffer
+PASS WAV 24000 Hz, 16 bit, mono, 1.000 s

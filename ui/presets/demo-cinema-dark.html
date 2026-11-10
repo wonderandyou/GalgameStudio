@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>潮汐契约 · 暗色电影感 · title</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#080a0d}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
+.stage{position:relative;width:100vw;height:100vh;overflow:hidden;user-select:none}
+.ver{position:absolute;font-size:12px;letter-spacing:.14em;opacity:.55;font-family:Consolas,monospace}
+.corner{position:absolute;display:flex;gap:16px;align-items:center}
+.corner button{background:none;border:0;cursor:pointer;font-size:19px;line-height:1;
+  opacity:.62;transition:opacity .18s,transform .18s;padding:4px}
+.corner button:hover{opacity:1;transform:scale(1.12)}
+
+.v2{background:#080a0d}
+.v2 .bg{position:absolute;inset:0;background-size:cover;background-position:center;
+  filter:saturate(.86) brightness(.74);transform:scale(1.03)}
+.v2 .veil{position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(6,8,11,.97) 0%,rgba(6,8,11,.72) 26%,
+    rgba(6,8,11,.10) 62%,rgba(6,8,11,.42) 100%),
+    radial-gradient(110% 70% at 78% 34%,rgba(255,196,120,.13),transparent 62%)}
+.v2 .logo{position:absolute;left:7.2%;bottom:31%}
+.v2 .cn{display:block;font-family:"Microsoft YaHei","PingFang SC",sans-serif;font-weight:800;
+  font-size:82px;color:#f6f1e6;letter-spacing:0.06em;
+  text-shadow:0 4px 30px rgba(0,0,0,.72)}
+.v2 .en{display:block;margin-top:14px;font-family:Consolas,monospace;font-size:13px;
+  letter-spacing:.62em;color:rgba(246,241,230,.55);text-transform:uppercase}
+.v2 .rule{position:absolute;left:7.4%;bottom:25.4%;width:190px;height:2px;
+  background:linear-gradient(90deg,#c9974f,transparent)}
+.v2 .menu{position:absolute;left:7.2%;bottom:9.5%;display:flex;align-items:center;
+  gap:30px;font-family:"Microsoft YaHei","PingFang SC",sans-serif;font-size:16px;letter-spacing:.16em;color:rgba(246,241,230,.55)}
+.v2 .menu a{text-decoration:none;color:inherit;padding:8px 2px;position:relative;transition:color .2s}
+.v2 .menu a:hover{color:#c9974f}
+.v2 .menu a::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1px;
+  background:#c9974f;transition:width .24s}
+.v2 .menu a:hover::after{width:100%}
+.v2 .menu .dot{width:4px;height:4px;border-radius:50%;background:#c9974f;opacity:.55}
+
+</style></head><body><div class="stage"><div class="v2"><div class="bg" style="background-image:url('file:///D:/软件/GalgameStudio/ui/assets/title/bg_port.png')"></div><div class="veil"></div><div class="logo"><span class="cn">潮汐契约</span><span class="en">WHALE FALL WORKSHOP</span></div><div class="rule"></div><div class="menu"><a href="#">开始游戏</a><span class="dot"></span><a href="#">继续游戏</a><span class="dot"></span><a href="#">读取存档</a><span class="dot"></span><a href="#">设置</a></div><div class="ver" style="left:7.4%;bottom:4%;color:rgba(246,241,230,.45)">v0.1.0</div><div class="corner" style="right:4.4%;bottom:4.2%"><button style="color:rgba(246,241,230,.75)" title="设置">⚙</button><button style="color:rgba(246,241,230,.75)" title="退出">✕</button></div></div></div></body></html>

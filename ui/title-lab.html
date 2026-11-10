@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>奇迹工坊 · 启动界面方案实验室</title>
+<style>
+/* ============ 公共 ============ */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#111}
+body{
+  font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:geometricPrecision;
+}
+.stage{
+  position:relative;width:100vw;height:100vh;
+  overflow:hidden;
+  user-select:none;
+}
+/* 标题字：楷体做书法感 */
+.brush{
+  font-family:"KaiTi","STKaiti","楷体",serif;
+  font-weight:700;
+  transform:skewX(-4deg);
+  text-shadow:0 2px 18px rgba(0,0,0,.28);
+}
+.sans{font-family:"Microsoft YaHei","PingFang SC",sans-serif}
+.serif{font-family:"SimSun","宋体",serif}
+
+/* 版本号 */
+.ver{
+  position:absolute;
+  font-size:12px;letter-spacing:.14em;opacity:.55;
+  font-family:Consolas,monospace;
+}
+/* 右下角齿轮 + 关闭 */
+.corner{
+  position:absolute;display:flex;gap:16px;align-items:center;
+}
+.corner button{
+  background:none;border:0;cursor:pointer;
+  font-size:19px;line-height:1;opacity:.62;
+  transition:opacity .18s, transform .18s;
+  padding:4px;
+}
+.corner button:hover{opacity:1;transform:scale(1.12)}
+
+/* =========================================================
+   方案 A · 水墨直系（宣纸 + 两侧立绘压边 + 竖排菜单）
+   ========================================================= */
+.v1{background:#f4efe4}
+.v1 .paper{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(120% 80% at 50% 0%, #fbf8f0 0%, #efe8d8 55%, #ddd3bd 100%),
+    repeating-linear-gradient(90deg, rgba(120,100,70,.035) 0 1px, transparent 1px 3px);
+}
+/* 纸纤维噪点 */
+.v1 .paper::after{
+  content:"";position:absolute;inset:0;
+  background-image:radial-gradient(rgba(90,75,50,.10) .5px, transparent .5px);
+  background-size:3px 3px;opacity:.5;
+}
+/* 两侧水墨晕染 */
+.v1 .ink{position:absolute;top:0;bottom:0;width:34%;pointer-events:none;
+  background:radial-gradient(60% 70% at 50% 60%, rgba(38,44,40,.20), transparent 70%);
+  filter:blur(18px);}
+.v1 .ink.l{left:-6%}
+.v1 .ink.r{right:-6%}
+.v1 .char{
+  position:absolute;bottom:0;height:58%;object-fit:contain;
+  mix-blend-mode:multiply;opacity:.66;
+  filter:contrast(1.04) saturate(.78) brightness(1.05);
+  -webkit-mask-image:linear-gradient(to top, transparent 0%, #000 30%, #000 100%);
+  mask-image:linear-gradient(to top, transparent 0%, #000 30%, #000 100%);
+}
+.v1 .char.l{left:1.4%;}
+.v1 .char.r{right:1.4%;transform:scaleX(-1);opacity:.60}
+/* 竖排标题 */
+.v1 .logo{
+  position:absolute;left:50%;top:6.5%;transform:translateX(-50%) skewX(-4deg);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.v1 .logo .cn{
+  writing-mode:vertical-rl;text-orientation:upright;
+  font-size:74px;line-height:1.04;letter-spacing:.10em;
+  color:#23282a;
+  text-shadow:0 3px 0 rgba(255,255,255,.5), 0 6px 22px rgba(60,50,30,.22);
+}
+.v1 .logo .seal{
+  margin-top:14px;width:38px;padding:10px 0;border-radius:3px;
+  background:#b8443a;color:#fbf3e6;
+  font-family:"KaiTi","STKaiti",serif;font-size:16px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;text-orientation:upright;white-space:nowrap;
+  letter-spacing:.14em;line-height:1;
+  transform:skewX(4deg);
+  box-shadow:0 2px 8px rgba(150,50,40,.3);
+}
+/* 竖排菜单：每项自己竖排，容器只负责排列，绝不让单字折列 */
+.v1 .menu{
+  position:absolute;left:25%;top:30%;
+  display:flex;flex-direction:row-reverse;align-items:flex-start;gap:44px;
+}
+.v1 .menu a{
+  writing-mode:vertical-rl;text-orientation:upright;
+  white-space:nowrap;
+  text-decoration:none;color:#3a3f3c;position:relative;
+  font-size:25px;line-height:1.02;letter-spacing:.24em;
+  padding:12px 0;transition:color .2s, text-shadow .2s;
+}
+.v1 .menu a small{
+  writing-mode:vertical-rl;font-size:10px;letter-spacing:.2em;
+  opacity:.42;margin-top:10px;font-family:Consolas,monospace;
+}
+.v1 .menu a:hover{color:#b8443a;text-shadow:0 0 18px rgba(184,68,58,.35)}
+.v1 .menu a::after{
+  content:"";position:absolute;left:-9px;top:12%;
+  width:2px;height:0;background:#b8443a;transition:height .22s;
+}
+.v1 .menu a:hover::after{height:76%}
+.v1 .ver{left:4.2%;bottom:4.6%;color:#6a6153;font-size:11.5px}
+.v1 .corner{right:4.6%;bottom:4.2%}
+.v1 .corner button{color:#4a4238}
+
+/* =========================================================
+   方案 B · 暗色电影感（全幅背景 + 底部横排）
+   ========================================================= */
+.v2{background:#080a0d}
+.v2 .bg{
+  position:absolute;inset:0;
+  background-size:cover;background-position:center;
+  filter:saturate(.86) brightness(.74);
+  transform:scale(1.03);
+}
+.v2 .veil{
+  position:absolute;inset:0;
+  background:
+    linear-gradient(to top, rgba(6,8,11,.97) 0%, rgba(6,8,11,.72) 26%, rgba(6,8,11,.10) 62%, rgba(6,8,11,.42) 100%),
+    radial-gradient(110% 70% at 78% 34%, rgba(255,196,120,.13), transparent 62%);
+}
+.v2 .logo{position:absolute;left:7.2%;bottom:31%}
+.v2 .logo .cn{
+  display:block;
+  font-size:82px;font-weight:800;color:#f6f1e6;letter-spacing:.06em;
+  text-shadow:0 4px 30px rgba(0,0,0,.72);
+}
+.v2 .logo .en{
+  display:block;margin-top:14px;
+  font-size:13px;letter-spacing:.62em;color:rgba(246,241,230,.52);
+  font-family:Consolas,monospace;text-transform:uppercase;
+}
+.v2 .rule{
+  position:absolute;left:7.4%;bottom:25.4%;
+  width:190px;height:2px;
+  background:linear-gradient(90deg,#c9974f,rgba(201,151,79,0));
+}
+.v2 .menu{
+  position:absolute;left:7.2%;bottom:9.5%;
+  display:flex;align-items:center;gap:30px;
+  font-size:16px;letter-spacing:.16em;color:rgba(246,241,230,.72);
+}
+.v2 .menu a{
+  text-decoration:none;color:inherit;padding:8px 2px;
+  position:relative;transition:color .2s;
+}
+.v2 .menu a:hover{color:#f3c887}
+.v2 .menu a::after{
+  content:"";position:absolute;left:0;bottom:0;width:0;height:1px;
+  background:#f3c887;transition:width .24s;
+}
+.v2 .menu a:hover::after{width:100%}
+.v2 .menu .dot{width:4px;height:4px;border-radius:50%;background:rgba(201,151,79,.55)}
+.v2 .ver{left:7.4%;bottom:4%;color:rgba(246,241,230,.45)}
+.v2 .corner{right:4.4%;bottom:4%}
+.v2 .corner button{color:rgba(246,241,230,.75)}
+
+/* =========================================================
+   方案 C · 明亮 indie（米白左文 + 右侧斜切配图）
+   ========================================================= */
+.v3{background:#f7f5f0}
+.v3 .left{
+  position:absolute;left:0;top:0;bottom:0;width:58%;
+  background:linear-gradient(160deg,#fdfcf9 0%,#f3efe6 100%);
+}
+.v3 .left::after{
+  content:"";position:absolute;inset:0;
+  background-image:radial-gradient(rgba(120,105,80,.07) .5px, transparent .5px);
+  background-size:4px 4px;
+}
+.v3 .slab{
+  position:absolute;right:0;top:0;bottom:0;width:46%;
+  clip-path:polygon(22% 0, 100% 0, 100% 100%, 0 100%);
+  background-size:cover;background-position:center;
+  filter:saturate(.95);
+}
+.v3 .slab::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(120deg, rgba(247,245,240,.72), rgba(247,245,240,0) 46%);
+}
+.v3 .logo{position:absolute;left:8%;top:17%}
+.v3 .logo .cn{
+  font-size:88px;font-weight:800;color:#23201c;letter-spacing:.03em;
+  line-height:1;
+}
+.v3 .logo .tag{
+  margin-top:18px;font-size:13px;letter-spacing:.34em;color:#8a7f6e;
+  font-family:Consolas,monospace;
+}
+.v3 .logo .hair{
+  margin-top:26px;width:66px;height:3px;background:#23201c;
+}
+.v3 .menu{position:absolute;left:8%;top:47%;display:flex;flex-direction:column;gap:2px}
+.v3 .menu a{
+  text-decoration:none;color:#33302b;
+  display:flex;align-items:baseline;gap:16px;
+  padding:11px 0;font-size:21px;letter-spacing:.1em;
+  transition:color .2s, padding-left .2s;
+}
+.v3 .menu a .no{
+  font-family:Consolas,monospace;font-size:11px;letter-spacing:.1em;
+  color:#b3a793;min-width:20px;
+}
+.v3 .menu a:hover{color:#b8443a;padding-left:7px}
+.v3 .menu a:hover .no{color:#b8443a}
+.v3 .ver{left:8%;bottom:6%;color:#9a8f7d}
+.v3 .corner{right:3.4%;bottom:4.4%}
+.v3 .corner button{color:#fdfcf9;text-shadow:0 1px 7px rgba(0,0,0,.6),0 0 2px rgba(0,0,0,.5)}
+
+/* =========================================================
+   方案 D · 冷色剧场（深蓝黑 + 居中细体大间距 + 上下细线）
+   ========================================================= */
+.v4{background:#060910}
+.v4 .bg{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  filter:brightness(.34) saturate(.55) hue-rotate(-8deg);
+}
+.v4 .glow{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(50% 42% at 50% 46%, rgba(96,158,255,.16), transparent 70%),
+    radial-gradient(120% 100% at 50% 120%, rgba(4,6,12,.96), transparent 62%);
+}
+.v4 .frame{position:absolute;inset:5.4% 6% ;pointer-events:none}
+.v4 .frame i{
+  position:absolute;background:rgba(150,185,235,.20);
+}
+.v4 .frame i.t{left:0;right:0;top:0;height:1px}
+.v4 .frame i.b{left:0;right:0;bottom:0;height:1px}
+.v4 .frame i.l{top:0;bottom:0;left:0;width:1px}
+.v4 .frame i.r{top:0;bottom:0;right:0;width:1px}
+.v4 .logo{
+  position:absolute;left:50%;top:24%;transform:translateX(-50%);
+  text-align:center;
+}
+.v4 .logo .cn{
+  display:block;
+  font-size:62px;font-weight:300;color:#eaf2ff;
+  letter-spacing:.44em;text-indent:.44em;
+  text-shadow:0 0 46px rgba(120,175,255,.42);
+}
+.v4 .logo .en{
+  display:block;margin-top:20px;
+  font-family:Consolas,monospace;font-size:11px;
+  letter-spacing:.72em;text-indent:.72em;color:rgba(175,200,240,.48);
+}
+.v4 .menu{
+  position:absolute;left:50%;top:56%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:19px;
+}
+.v4 .menu a{
+  text-decoration:none;color:rgba(220,233,252,.68);
+  font-size:16px;letter-spacing:.42em;text-indent:.42em;
+  padding:4px 0;transition:color .24s, text-shadow .24s, letter-spacing .24s;
+}
+.v4 .menu a:hover{
+  color:#fff;letter-spacing:.52em;text-indent:.52em;
+  text-shadow:0 0 22px rgba(140,190,255,.85);
+}
+.v4 .ver{
+  left:50%;bottom:8%;transform:translateX(-50%);
+  color:rgba(175,200,240,.40);
+}
+.v4 .corner{right:8%;bottom:5.2%}
+.v4 .corner button{color:rgba(200,220,250,.6)}
+
+/* 提示条（截图时用 ?hud=0 关掉） */
+.hud{
+  position:fixed;left:50%;bottom:10px;transform:translateX(-50%);
+  z-index:99;background:rgba(0,0,0,.72);color:#fff;
+  font-size:12px;letter-spacing:.08em;padding:6px 14px;border-radius:20px;
+  font-family:Consolas,monospace;pointer-events:none;
+}
+body.nohud .hud{display:none}
+</style>
+</head>
+<body class="nohud">
+<div class="stage" id="stage"></div>
+<div class="hud" id="hud"></div>
+
+<script>
+const IMG = {
+  bg:   'assets/title/bg_port.png',
+  bg2:  'assets/title/bg_city.png',
+  charL:'assets/title/char_l.png',
+  charR:'assets/title/char_r.png',
+};
+
+const MENU = [
+  ['开始游戏', 'START'],
+  ['继续游戏', 'CONTINUE'],
+  ['读取存档', 'LOAD'],
+  ['设置',     'SETTINGS'],
+];
+
+function menuA(){
+  return MENU.map(([cn])=>`<a href="#">${cn}</a>`).join('');
+}
+function menuV2(){
+  return MENU.map(([cn],i)=>((i?'<span class="dot"></span>':'')+`<a href="#">${cn}</a>`)).join('');
+}
+function menuV3(){
+  return MENU.map(([cn],i)=>`<a href="#"><span class="no">0${i+1}</span>${cn}</a>`).join('');
+}
+function menuV4(){
+  return ['开始','继续','读档','设置'].map(t=>`<a href="#">${t}</a>`).join('');
+}
+function corner(color){
+  return `<div class="corner">
+    <button title="设置">⚙</button>
+    <button title="退出">✕</button>
+  </div>`;
+}
+function ver(txt){ return `<div class="ver">${txt}</div>`; }
+
+const VIEWS = {
+  1: () => `
+    <div class="paper"></div>
+    <div class="ink l"></div><div class="ink r"></div>
+    <img class="char l" src="${IMG.charL}" alt="">
+    <img class="char r" src="${IMG.charR}" alt="">
+    <div class="logo">
+      <div class="cn brush">奇迹工坊</div>
+      <div class="seal">奇迹工坊</div>
+    </div>
+    <div class="menu">${menuA()}</div>
+    ${ver('v0.1.0 build 2026.11')}
+    ${corner()}
+  `,
+  2: () => `
+    <div class="bg" style="background-image:url('${IMG.bg}')"></div>
+    <div class="veil"></div>
+    <div class="logo sans">
+      <span class="cn">奇迹工坊</span>
+      <span class="en">Whale Fall Workshop</span>
+    </div>
+    <div class="rule"></div>
+    <div class="menu sans">${menuV2()}</div>
+    ${ver('v0.1.0 build 2026.11')}
+    ${corner()}
+  `,
+  3: () => `
+    <div class="left"></div>
+    <div class="slab" style="background-image:url('${IMG.bg2}')"></div>
+    <div class="logo sans">
+      <div class="cn">奇迹工坊</div>
+      <div class="tag">WHALE FALL WORKSHOP</div>
+      <div class="hair"></div>
+    </div>
+    <div class="menu sans">${menuV3()}</div>
+    ${ver('v0.1.0 build 2026.11')}
+    ${corner()}
+  `,
+  4: () => `
+    <div class="bg" style="background-image:url('${IMG.bg2}')"></div>
+    <div class="glow"></div>
+    <div class="frame"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i></div>
+    <div class="logo sans">
+      <span class="cn">奇迹工坊</span>
+      <span class="en">WHALE FALL WORKSHOP</span>
+    </div>
+    <div class="menu sans">${menuV4()}</div>
+    ${ver('v0.1.0 build 2026.11')}
+    ${corner()}
+  `,
+};
+
+const NAMES = {1:'方案 A · 水墨直系', 2:'方案 B · 暗色电影感', 3:'方案 C · 明亮 indie', 4:'方案 D · 冷色剧场'};
+const q = new URLSearchParams(location.search);
+const v = String(q.get('v') || '1');
+const stage = document.getElementById('stage');
+stage.className = 'stage v' + v;
+stage.innerHTML = (VIEWS[v] || VIEWS[1])();
+
+document.getElementById('hud').textContent = NAMES[v] || '';
+if (q.get('hud') === '0') document.body.classList.add('nohud');
+window.__READY__ = true;
+</script>
+</body>
+</html>

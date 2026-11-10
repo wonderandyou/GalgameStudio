@@ -1,0 +1,95 @@
+{
+  "open": {
+    "title": "鲸落工坊 · Galgame Studio",
+    "canvasNodes": 800,
+    "errors": []
+  },
+  "navigation": [
+    {
+      "view": "projects",
+      "active": "view-projects",
+      "player": false
+    },
+    {
+      "view": "setup",
+      "active": "view-setup",
+      "player": false
+    },
+    {
+      "view": "editor",
+      "active": "view-editor",
+      "player": false
+    },
+    {
+      "view": "play",
+      "active": "view-editor",
+      "player": true
+    },
+    {
+      "view": "export",
+      "active": "view-export",
+      "player": false
+    }
+  ],
+  "chapterTree": {
+    "acts": 2,
+    "chapters": 20,
+    "visible": true,
+    "collapsed": 1
+  },
+  "singleChapter": {
+    "visible": {
+      "chapter": "c3",
+      "nodes": 40,
+      "links": 39,
+      "totalNodes": 800
+    },
+    "litegraphNodes": 40,
+    "activeRows": 1
+  },
+  "showAll": {
+    "chapter": null,
+    "nodes": 800,
+    "links": 780,
+    "totalNodes": 800
+  },
+  "slider": {
+    "minutesLabel": "90 分钟",
+    "estimate": "预估 731 节点",
+    "nodeMax": "2000"
+  },
+  "generatePayload": {
+    "node_count": 8,
+    "branch_depth": 2,
+    "target_minutes": 90,
+    "auto_voice": true,
+    "consistency": true,
+    "resolution": [
+      1920,
+      1080
+    ]
+  },
+  "cancellation": {
+    "requestedJobId": "job-cancel-check",
+    "panelHidden": true
+  },
+  "performance": {
+    "renderedFrames": 120,
+    "averageFps": 521.9,
+    "frameP95Ms": 4.1,
+    "fullDrawMedianMs": 0.6,
+    "fullDrawP95Ms": 1.2,
+    "inputDispatchMedianMs": 0.1,
+    "inputDispatchP95Ms": 0.3
+  },
+  "noChapters": {
+    "hidden": true,
+    "visible": {
+      "chapter": null,
+      "nodes": 800,
+      "links": 780,
+      "totalNodes": 800
+    }
+  },
+  "finalErrors": []
+}

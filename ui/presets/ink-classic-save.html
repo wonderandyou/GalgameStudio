@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>奇迹工坊 · 水墨直系 · save</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#f4efe4}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
+.stage{position:relative;width:100vw;height:100vh;overflow:hidden;user-select:none}
+.ver{position:absolute;font-size:12px;letter-spacing:.14em;opacity:.55;font-family:Consolas,monospace}
+.corner{position:absolute;display:flex;gap:16px;align-items:center}
+.corner button{background:none;border:0;cursor:pointer;font-size:19px;line-height:1;
+  opacity:.62;transition:opacity .18s,transform .18s;padding:4px}
+.corner button:hover{opacity:1;transform:scale(1.12)}
+
+.s{position:absolute;inset:0;background:#f4efe4;display:flex;padding:46px;gap:28px}
+.frame-tag{position:absolute;left:46px;top:30px;font-family:Consolas,monospace;
+  font-size:11.5px;letter-spacing:.22em;color:#b8443a;opacity:.85}
+.card{position:relative;border-radius:4px}
+.dialog-wrap{position:absolute;left:4%;right:4%;bottom:4%;height:28%;
+  background:rgba(244,239,228,.94);border:1px solid rgba(120,100,70,.28);border-radius:4px;
+  display:flex;flex-direction:column;justify-content:center;gap:14px;padding:26px 34px}
+.who{font-family:"Microsoft YaHei","PingFang SC",sans-serif;font-size:15px;letter-spacing:.16em;color:#b8443a}
+.say{font-family:"Microsoft YaHei","PingFang SC",sans-serif;font-size:25px;line-height:1.5;color:#23282a;letter-spacing:.03em}
+.choices{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;gap:14px;width:min(620px,52%)}
+.opt{background:rgba(244,239,228,.96);border:1px solid rgba(120,100,70,.30);border-radius:4px;
+  padding:18px 26px;font-family:"Microsoft YaHei","PingFang SC",sans-serif;font-size:19px;letter-spacing:.08em;
+  color:#3a3f3c;transition:background .2s}
+.opt.on{background:rgba(184,68,58,.10)}
+.slots{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  display:grid;grid-template-columns:1fr 1fr;gap:18px;width:min(880px,74%)}
+.slot{background:#f7f3e9;border:1px solid #b8443a;border-radius:4px;
+  padding:20px 22px;font-family:"Microsoft YaHei","PingFang SC",sans-serif;color:#3a3f3c}
+.slot b{display:block;font-size:17px;letter-spacing:.06em;margin-bottom:8px}
+.slot span{font-family:Consolas,monospace;font-size:11.5px;color:#b8443a;opacity:.85}
+.row{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(760px,64%);display:flex;flex-direction:column;gap:2px}
+.ri{display:flex;justify-content:space-between;align-items:center;padding:17px 4px;
+  border-bottom:1px solid #b8443a;font-family:"Microsoft YaHei","PingFang SC",sans-serif;font-size:17px;color:#3a3f3c}
+.ri em{font-style:normal;color:#b8443a;font-family:Consolas,monospace;font-size:13px}
+.hudbar{position:absolute;left:0;right:0;top:0;height:88px;background:rgba(244,239,228,.86);
+  display:flex;align-items:center;padding:0 34px;gap:26px;
+  font-family:"Microsoft YaHei","PingFang SC",sans-serif;font-size:14px;letter-spacing:.12em;color:#4a4238}
+.hudbar b{font-weight:700;font-size:15px;letter-spacing:.06em}
+.hudbar .sp{flex:1}
+
+</style></head><body><div class="stage"><div class="s"><div style="position:absolute;inset:0;;opacity:.45"></div><div class="frame-tag">水墨直系 · save</div><div class="slots"><div class="slot"><b>存档 1</b><span>第 1 章 · 雨夜码头 · 10 分钟</span></div><div class="slot"><b>存档 2</b><span>第 2 章 · 雨夜码头 · 17 分钟</span></div><div class="slot"><b>存档 3</b><span>第 3 章 · 雨夜码头 · 24 分钟</span></div><div class="slot"><b>存档 4</b><span>第 4 章 · 雨夜码头 · 31 分钟</span></div></div></div></div></body></html>

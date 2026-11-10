@@ -1,0 +1,11 @@
+﻿# 奇迹工坊 · 后端依赖（app/.venv）
+# 安装：app\.venv\Scripts\python.exe -m pip install -r requirements.txt
+fastapi==0.162.0
+uvicorn==0.54.0
+httpx==0.28.1
+pydantic==2.14.3
+pillow==13.0.0
+# 抠图：isnet-anime 动漫立绘专用模型（模型文件在 models/isnet-anime.onnx，167.9 MB）
+rembg==2.0.87
+onnxruntime==1.31.1
+numpy==2.4.6

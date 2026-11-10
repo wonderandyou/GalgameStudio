@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>启动界面 · 四套方案总览</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#15171b;color:#e6e9ee;
+  font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+  padding:26px 26px 22px;
+}
+.head{display:flex;align-items:baseline;gap:16px;margin-bottom:18px}
+.head h1{font-size:23px;font-weight:700;letter-spacing:.04em}
+.head .sub{font-size:12.5px;color:#7f8794;letter-spacing:.1em;font-family:Consolas,monospace}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{background:#1c1f25;border:1px solid #2b3038;border-radius:9px;overflow:hidden}
+.card img{display:block;width:100%;height:auto}
+.meta{display:flex;align-items:baseline;gap:11px;padding:11px 14px 12px}
+.meta .tag{
+  font-size:11px;font-family:Consolas,monospace;letter-spacing:.12em;
+  color:#0f1116;background:#c9a86a;border-radius:4px;padding:2px 7px;font-weight:700;
+}
+.meta .name{font-size:16px;font-weight:700;letter-spacing:.03em}
+.meta .desc{font-size:12px;color:#88909d;letter-spacing:.02em;margin-left:auto}
+</style>
+</head>
+<body>
+<div class="head">
+  <h1>奇迹工坊 · 启动界面 4 套排版</h1>
+  <span class="sub">GalgameStudio / ui/title-lab.html</span>
+</div>
+<div class="grid">
+  <div class="card">
+    <img src="assets/title/shot_v1.png" alt="方案A">
+    <div class="meta"><span class="tag">A</span><span class="name">水墨直系</span>
+      <span class="desc">宣纸底 · 竖排菜单 · 两侧立绘压边</span></div>
+  </div>
+  <div class="card">
+    <img src="assets/title/shot_v2.png" alt="方案B">
+    <div class="meta"><span class="tag">B</span><span class="name">暗色电影感</span>
+      <span class="desc">全幅背景 · 左下大字 · 底部横排</span></div>
+  </div>
+  <div class="card">
+    <img src="assets/title/shot_v3.png" alt="方案C">
+    <div class="meta"><span class="tag">C</span><span class="name">明亮 indie</span>
+      <span class="desc">米白左文 · 右侧斜切配图 · 编号菜单</span></div>
+  </div>
+  <div class="card">
+    <img src="assets/title/shot_v4.png" alt="方案D">
+    <div class="meta"><span class="tag">D</span><span class="name">冷色剧场</span>
+      <span class="desc">居中细体大间距 · 细线框 · 上下对称</span></div>
+  </div>
+</div>
+</body>
+</html>

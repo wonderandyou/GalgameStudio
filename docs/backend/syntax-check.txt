@@ -1,0 +1,13 @@
+PASS Python syntax: outputs\GalgameStudio-backend\app\config.py
+PASS Python syntax: outputs\GalgameStudio-backend\app\main.py
+PASS Python syntax: outputs\GalgameStudio-backend\app\store.py
+PASS Python syntax: outputs\GalgameStudio-backend\app\windows_crypto.py
+PASS Python syntax: outputs\GalgameStudio-backend\app\__init__.py
+PASS Python syntax: outputs\GalgameStudio-backend\app\providers\base.py
+PASS Python syntax: outputs\GalgameStudio-backend\app\providers\probe.py
+PASS Python syntax: outputs\GalgameStudio-backend\app\providers\websocket_probe.py
+PASS Python syntax: outputs\GalgameStudio-backend\app\providers\__init__.py
+PASS Python syntax: outputs\GalgameStudio-backend\tests\test_m1.py
+Python files: 10
+PASS PowerShell syntax: demo.ps1
+PASS PowerShell syntax: start.ps1

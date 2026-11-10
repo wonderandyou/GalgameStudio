@@ -1,0 +1,42 @@
+{
+  "id": "ink-classic",
+  "name": "水墨直系",
+  "vibe": "宣纸留白，毛笔竖排，安静克制",
+  "keywords": [
+    "水墨", "宣纸", "江南", "古风", "书法",
+    "留白", "江湖", "武侠", "仙侠", "民国", "毛笔", "雨巷",
+    "旧事", "故人", "回忆", "安静", "文艺", "日常", "悬疑", "年代"
+  ],
+  "fit": ["年代剧", "古风", "悬疑", "日常"],
+  "palette": {
+    "bg": "#f4efe4",
+    "fg": "#23282a",
+    "accent": "#b8443a",
+    "muted": "#6a6153",
+    "panel": "#efe8d8"
+  },
+  "typeface": {
+    "title": "brush",
+    "body": "sans",
+    "mono": "mono"
+  },
+  "layout": {
+    "menu": "vertical",
+    "title_align": "center",
+    "title_size": 74,
+    "title_weight": 700,
+    "letter_spacing": "0.10em",
+    "skew": "-4deg",
+    "show_characters": true,
+    "character_opacity": 0.66,
+    "seal": true
+  },
+  "surfaces": {
+    "dialog": {"bg": "rgba(244,239,228,.94)", "fg": "#23282a", "border": "1px solid rgba(120,100,70,.28)", "radius": "2px", "height": "28%"},
+    "choice": {"bg": "rgba(244,239,228,.96)", "fg": "#3a3f3c", "hover": "rgba(184,68,58,.10)", "border": "1px solid rgba(120,100,70,.30)", "radius": "2px"},
+    "save": {"bg": "#f7f3e9", "fg": "#3a3f3c", "accent": "#b8443a"},
+    "settings": {"bg": "#f7f3e9", "fg": "#3a3f3c", "accent": "#b8443a"},
+    "hud": {"bg": "rgba(244,239,228,.86)", "fg": "#4a4238", "height": "88px"}
+  },
+  "notes": "立绘必须白底，靠 multiply 混进纸底；四字印章竖排单列；菜单从右往左。"
+}

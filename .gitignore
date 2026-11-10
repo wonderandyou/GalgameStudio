@@ -1,0 +1,75 @@
+﻿# Python
+app/.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# 生成出来的项目数据（60+ 个测试项目，体积大、不是源码）
+projects/
+
+# 临时与渲染产物
+tmp/
+ui/presets/_shots/
+ui/presets/_prof/
+ui/rendered/
+ui/assets/title/_smoke*.png
+
+# 验收截图 / 日志（产物不进版本库）
+tools/*.png
+tools/*.log
+tools/_edgeprof*/
+docs/screens/**/_prof/
+docs/screens/**/_profile/
+
+# 系统
+Thumbs.db
+desktop.ini
+.DS_Store
+unity/Library/
+unity/Build/
+unity/Temp/
+unity/Logs/
+unity/obj/
+unity/UserSettings/
+**/_prof*/
+**/_edgeprof*/
+**/_p_*/
+**/GPUCache/
+**/Local Storage/
+tools/unity_logs/
+ui/*.bak_hook
+docs/screens/**/_*/
+ui/presets/**/_*/
+launcher.log
+tools/*.wav
+launcher-exe.log
+
+# 抠图模型：167 MB，不进版本库（随项目目录一起拷，不放 git）
+models/*.onnx
+
+# 运行期状态与凭据：绝对不能进版本库
+# （.state/credentials.json 里是 DPAPI 加密的密钥密文，换机器解不开，但仍不该提交）
+.state/
+.jobs/
+library/
+
+# 启动器编译产物与日志
+launcher/launcher_out.exe
+launcher/*.o
+launcher/app_icon.ico
+launcher/*启动器日志.txt
+launcher/_old_launcher_backup.exe
+launcher/*.exe.bak
+dist/
+build/work/
+
+# 本地验收截图
+_qa/
+
+# 测试用的临时状态目录
+.state_test/
+
+# WebView2 运行时临时 profile（会被会话误提交，一律不进版本库）
+tmp*/
+# 按骨架修复写盘前的 graph.json 备份（tools/repair_from_skeleton.py / POST repair-from-skeleton）
+_backup_projects/

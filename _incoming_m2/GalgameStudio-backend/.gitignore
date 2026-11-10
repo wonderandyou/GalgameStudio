@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.demo-state/
+.local/
+credentials.json
+projects/
+
+.jobs/
+export/

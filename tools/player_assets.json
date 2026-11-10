@@ -1,0 +1,8 @@
+{
+  "p0": "{\"project\":\"雨停之前\",\"projectId\":\"p_819385234a9a428ba4ce8ab8d205478a\",\"nodes\":300}",
+  "p1": "{\"projectId\":\"p_819385234a9a428ba4ce8ab8d205478a\",\"mode\":\"real\",\"missing\":[],\"nodeCount\":300}",
+  "s1": "{\"bgImage\":\"url(\\\"http://127.0.0.1:8790/api/assets/p_819385234a9a428ba4ce8ab8d205478a/assets/bg/mock.png\\\")\",\"bgClass\":\"bg rainy\",\"rainDisplay\":\"none\",\"charCount\":1,\"charSrcs\":[\"http://127.0.0.1:8790/api/assets/p_819385234a9a428ba4ce8ab8d205478a/assets/ref/mock.png\"],\"charLoaded\":[true],\"txt\":\"故事从这里开始\",\"who\":\"旁白\",\"voiceLabel\":\"1.6s\",\"audioSrc\":\"http://127.0.0.1:8790/api/assets/p_819385234a9a428ba4ce8ab8d205478a/assets/voice/silent_1.556.wav\",\"audioTime\":1.000262,\"audioPaused\":false,\"audioDur\":1.556,\"nodeId\":\"n1\"}",
+  "s2": "{\"txt\":\"故事从这里开始\",\"voiceLabel\":\"1.6s\",\"audioSrc\":\"http://127.0.0.1:8790/api/assets/p_819385234a9a428ba4ce8ab8d205478a/assets/voice/silent_1.556.wav\",\"audioTime\":1.556,\"audioPaused\":true,\"bgImage\":\"url(\\\"http://127.0.0.1:8790/api/assets/p_819385234a9a428ba4ce8ab8d205478a/assets/bg/mock.png\\\")\",\"charCount\":1,\"nodeId\":\"n1\"}",
+  "s3": "{\"nodeId\":\"n2\",\"txt\":\"雨水打着窗玻璃，我还是把想问的话咽了回去\",\"bgImage\":\"url(\\\"http://127.0.0.1:8790/api/assets/p_819385234a9a428ba4ce8ab8d205478a/assets/bg/mock.png\\\")\",\"charCount\":1,\"audioSrc\":\"http://127.0.0.1:8790/api/assets/p_819385234a9a428ba4ce8ab8d205478a/assets/voice/silent_4.444.wav\",\"audioTime\":0.868948,\"hist\":\"2\"}",
+  "s4": "{\"nodeId\":\"n2\",\"txt\":\"雨水打着窗玻璃，我还是把想问的话咽了回去\",\"who\":\"heroine\",\"voiceLabel\":\"4.4s\",\"audioSrc\":\"silent_4.444.wav\",\"audioTime\":4.444,\"audioPaused\":true,\"charCount\":1}"
+}

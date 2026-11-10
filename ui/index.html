@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>奇迹工坊 · Galgame Studio</title>
+<link rel="icon" type="image/png" href="brand/界面图标-256.png">
+<style>
+  /* ★ 底色必须内联、且放在【所有 <link> 之前】。
+     原因：外链 CSS 是阻塞渲染的，浏览器在它下载/解析完之前不会画页面；
+     这段时间里如果 html/body 没有底色，就会先糊出一层默认白 —— 那就是"闪白"。
+     ⚠ 启动遮罩已删除（2026-11-07）：窗口现在是先在屏幕外加载、页面画好才移进屏幕，
+       遮罩不但多余，它那 280ms 的淡出本身就会被看成"界面消失一下又回来"。 */
+  html, body { background: #f2f4f8; margin: 0; }
+</style>
+<link rel="stylesheet" href="app.css?v=20261109b">
+<link rel="stylesheet" href="vendor/litegraph.css">
+</head>
+<body>
+
+<!-- ======================= 顶部栏 ======================= -->
+<header class="titlebar">
+  <div class="brand">
+    <div class="brand-logo" role="img" aria-label="奇迹工坊"></div>
+    奇迹工坊
+    <small>Galgame Studio</small>
+  </div>
+
+  <nav class="pillnav" id="nav">
+    <button data-view="projects">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4l2 2.5h7A1.5 1.5 0 0 1 19 10v7.5A1.5 1.5 0 0 1 17.5 19h-13A1.5 1.5 0 0 1 3 17.5Z"/></svg>
+      项目
+    </button>
+    <button data-view="setup" class="active">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h7"/><circle cx="18" cy="17" r="2.4"/></svg>
+      接口配置
+    </button>
+    <!-- 剧情编排 / 试玩 / 打包 属于「某个项目」，不放顶层导航。
+         这里保留 DOM（隐藏）是为了自动化测试还能定位到；真正入口在项目工作区导航条。 -->
+    <button data-view="editor" style="display:none">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="6" rx="1.5"/><rect x="14" y="14" width="7" height="6" rx="1.5"/><path d="M10 7h4a3 3 0 0 1 3 3v4"/></svg>
+      剧情编排
+    </button>
+    <button data-view="play" style="display:none">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4.5v15l12-7.5-12-7.5Z"/></svg>
+      试玩
+    </button>
+    <!-- 素材库不放在顶部导航：它属于某个具体项目，入口在「剧情编排」里 -->
+    <button data-view="export" style="display:none">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7.5 10.5 4.5 4.5 4.5-4.5"/><path d="M4 19h16"/></svg>
+      打包
+    </button>
+    <button data-view="settings">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1Z"/></svg>
+      设置
+    </button>
+  </nav>
+
+  <!-- 进项目后顶替上面那条导航：← 所有项目 | 项目名 | 剧情编排 / 打包
+       （试玩不放这儿：画布工具栏已有「▶ 试玩」，重复了） -->
+  <nav class="pillnav" id="projBar" hidden>
+    <button class="pb-back" id="pbBack">← 所有项目</button>
+    <span class="pb-name" id="pbName">未命名项目</span>
+    <button data-pgo="editor" class="active">剧情编排</button>
+    <button data-pgo="export">打包</button>
+  </nav>
+
+  <div class="spacer"></div>
+  <button class="perf-toggle" id="btnPerf" title="低功耗：关闭所有动画与毛玻璃">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M12 4v9"/><circle cx="12" cy="17" r="2"/></svg>
+    低功耗
+  </button>
+  <div class="meta"><span class="mode-badge" id="modeBadge">模拟</span><span id="globalMeta"><span class="tp"></span> 3 个接口就绪 · 本地 ComfyUI 已连接</span></div>
+  <div class="wincontrols">
+    <button id="btnWinMin" title="最小化"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M2 6h8" stroke="currentColor" stroke-width="1.6"/></svg></button>
+    <button class="close" id="btnWinClose" title="关闭"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M2.4 2.4l7.2 7.2M9.6 2.4L2.4 9.6" stroke="currentColor" stroke-width="1.6"/></svg></button>
+  </div>
+</header>
+
+<main>
+
+<!-- ======================= 视图 0：项目 ======================= -->
+<section class="view" id="view-projects">
+  <div class="view-inner">
+    <div class="setup-wrap">
+      <div class="setup-top">
+        <div>
+          <div class="eyebrow">Step 00 / Projects</div>
+          <h1 class="page-title">你的项目</h1>
+          <p class="page-sub">每个项目是一个独立的工程目录：剧情图、素材、导出结果都在里面，删掉就是真删。</p>
+        </div>
+        <div class="side">
+          共 <b id="projCount">0</b> 个项目<br>
+          存在 <code>projects\p_xxxxxxxx\</code>
+        </div>
+      </div>
+
+      <div class="sec-head"><h2>新建</h2><div class="ln"></div></div>
+      <div class="proj-new">
+        <input id="newProjName" type="text" placeholder="项目名，比如「雨停之前」" maxlength="120">
+        <button class="btn primary" id="btnNewProject">新建项目</button>
+        <button class="btn ghost" id="btnRefreshProjects">刷新列表</button>
+      </div>
+
+      <div class="sec-head"><h2>全部项目</h2><div class="ln"></div><span class="tag" id="projHint">正在读取…</span></div>
+      <div class="proj-grid" id="projGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 设置 ======================= -->
+<section class="view" id="view-settings">
+  <div class="view-inner">
+    <div class="setup-wrap">
+      <div class="setup-top">
+        <div>
+          <div class="eyebrow">Settings</div>
+          <h1 class="page-title">设置</h1>
+          <p class="page-sub">本机偏好，跟具体项目无关。放在这里的东西对所有项目生效。</p>
+        </div>
+      </div>
+
+      <div class="sec-head"><h2>项目保存位置</h2><div class="ln"></div></div>
+      <div class="set-card">
+        <p class="set-note">所有项目（剧情图、素材、导出结果）都放在这个目录下。</p>
+        <div class="set-row">
+          <input id="setProjectsDir" type="text" placeholder="例如 D:\GalgameProjects（留空 = 程序目录下的 projects）">
+        </div>
+        <div class="set-row">
+          <button class="btn primary sm" id="setSave">保存</button>
+          <button class="btn sm ghost" id="setOpenDir">打开当前目录</button>
+          <button class="btn sm ghost" id="setResetDir">恢复默认</button>
+          <span class="set-state" id="setState"></span>
+        </div>
+        <p class="set-tip">改完要重启「奇迹工坊」才生效；已有项目不会自动搬过去。</p>
+      </div>
+
+      <div class="sec-head"><h2>数据与外观</h2><div class="ln"></div></div>
+      <div class="set-card">
+        <div class="set-kv">
+          <span>数据目录</span><code id="setDataDir">—</code>
+          <button class="btn sm ghost" id="setOpenData">打开</button>
+        </div>
+        <div class="set-kv"><span>配置文件</span><code id="setFile">—</code></div>
+        <div class="set-kv">
+          <span>低功耗</span>
+          <label class="set-switch"><input type="checkbox" id="setLowPower"> 关闭动画与毛玻璃（省电、老机器更顺）</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 视图 1：接口配置 ======================= -->
+<section class="view active" id="view-setup">
+  <div class="view-inner">
+    <div class="setup-wrap">
+      <div class="setup-top">
+        <div>
+          <div class="eyebrow">Step 01 / Connection</div>
+          <h1 class="page-title">先接上你的接口</h1>
+          <p class="page-sub">云端和本地可以混用：生图、语音、剧本各挑一个。填好点「测试」，通了才能进下一步。</p>
+        </div>
+        <div class="side">
+          已就绪 <b id="readyCount">0 / 6</b><br>
+          密钥只存在本机 <code>%LOCALAPPDATA%\GalgameStudio\credentials.json</code>
+        </div>
+      </div>
+
+      <div class="sec-head"><h2>云端接口</h2><div class="ln"></div><span class="tag">走公网 · 按量计费</span></div>
+      <div class="api-grid">
+
+        <div class="api-card cloud">
+          <div class="api-head">
+            <div class="api-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.6" cy="9.6" r="1.5"/><path d="m3.5 17 5-4.6 4 3.6 3-2.6 5 3.6"/></svg>
+            </div>
+            <div><div class="t">通义千问 · 生图</div><div class="s">DashScope / 万相 · 云端出背景与立绘</div></div>
+            <div class="state"><span class="dot ok"></span>已连接</div>
+          </div>
+          <div class="api-body">
+            <div class="field"><label>API Key</label><input type="password" value="sk-••••••••••••••••••••••••3f7a"></div>
+            <div class="field-row">
+              <div class="field"><label>模型</label><select><option>wanx2.1-t2i-plus</option><option>qwen-image</option><option>wanx2.1-t2i-turbo</option></select></div>
+              <div class="field"><label>默认尺寸</label><select><option>1280×720（背景）</option><option>832×1216（立绘）</option><option>1024×1024</option></select></div>
+            </div>
+          </div>
+          <div class="api-foot">
+            <button class="btn sm test" data-name="千问生图">测试连接</button>
+            <span class="hint ok">延迟 412ms · 余额正常</span>
+            <button class="btn sm link" data-help="qwen">怎么申请</button>
+            <button class="btn sm link" data-open-url="https://bailian.console.aliyun.com/">前往网站 ↗</button>
+          </div>
+        </div>
+
+        <div class="api-card cloud">
+          <div class="api-head">
+            <div class="api-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 10v4"/></svg>
+            </div>
+            <div><div class="t">百炼 · 语音合成</div><div class="s">CosyVoice v2 · 逐句配音</div></div>
+            <div class="state"><span class="dot ok"></span>已连接</div>
+          </div>
+          <div class="api-body">
+            <div class="field"><label>API Key</label><input type="password" value="sk-••••••••••••••••••••••••91cd"></div>
+            <div class="field-row">
+              <div class="field"><label>音色</label><select><option>longxiaochun（女·温柔）</option><option>longwan（女·清冷）</option><option>longcheng（男·沉稳）</option></select></div>
+              <div class="field"><label>语速</label><select><option>0.92×（叙事）</option><option>1.00×</option><option>1.08×</option></select></div>
+            </div>
+          </div>
+          <div class="api-foot">
+            <button class="btn sm test" data-name="百炼 TTS">测试连接</button>
+            <span class="hint ok">延迟 640ms · 采样率 24kHz</span>
+            <button class="btn sm link" data-help="tts">怎么申请</button>
+            <button class="btn sm link" data-open-url="https://bailian.console.aliyun.com/">前往网站 ↗</button>
+          </div>
+        </div>
+
+        <div class="api-card cloud">
+          <div class="api-head">
+            <div class="api-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 4.6 7.4v9.2L12 20.8l7.4-4.2V7.4L12 3.2Z"/><path d="M12 12v8.8M4.6 7.4 12 12l7.4-4.6"/></svg>
+            </div>
+            <div><div class="t">大语言模型 · 剧本</div><div class="s">DeepSeek / 任意 OpenAI 兼容</div></div>
+            <div class="state"><span class="dot ok"></span>已连接</div>
+          </div>
+          <div class="api-body">
+            <div class="field"><label>Base URL</label><input value="https://api.deepseek.com/v1"></div>
+            <div class="field"><label>API Key</label><input type="password" value="sk-••••••••••••••••••••••••b7e2"></div>
+            <div class="field-row">
+              <div class="field"><label>模型</label><select><option>deepseek-chat</option><option>deepseek-reasoner</option><option>qwen-max</option><option>glm-4-plus</option></select></div>
+              <div class="field"><label>温度</label><select><option>0.85（叙事）</option><option>0.6</option><option>1.1</option></select></div>
+            </div>
+          </div>
+          <div class="api-foot">
+            <button class="btn sm test" data-name="LLM">测试连接</button>
+            <span class="hint ok">延迟 780ms · 上下文 64k</span>
+            <button class="btn sm link" data-help="llm">怎么申请</button>
+            <button class="btn sm link" data-open-url="https://platform.deepseek.com/api_keys">前往网站 ↗</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="sec-head"><h2>本地接口</h2><div class="ln"></div><span class="tag">本机跑 · 不花钱 · 占显存</span></div>
+      <div class="api-grid">
+
+        <div class="api-card local">
+          <div class="api-head">
+            <div class="api-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18M3 9h18M3 15h18"/></svg>
+            </div>
+            <div><div class="t">ComfyUI · 本地生图</div><div class="s">Qwen-Image 2.1 · 1024 出图</div></div>
+            <div class="state"><span class="dot ok"></span>已连接</div>
+          </div>
+          <div class="api-body">
+            <div class="field-row">
+              <div class="field"><label>服务地址</label><input value="http://127.0.0.1:8188"></div>
+              <div class="field"><label>显存</label><select><option>8G · 串行</option><option>12G · 并行 2</option></select></div>
+            </div>
+            <div class="field"><label>工作流</label><select><option>galgame_bg.json（背景 1280×720）</option><option>galgame_char.json（立绘 832×1216）</option></select></div>
+            <div class="field"><label>采样</label><select><option>25 步 · cfg 1 · euler</option><option>40 步 · cfg 1 · dpmpp_2m</option></select></div>
+          </div>
+          <div class="api-foot">
+            <button class="btn sm test" data-name="ComfyUI">测试连接</button>
+            <span class="hint ok">队列空闲 · 平均 52s/张</span>
+          </div>
+        </div>
+
+        <div class="api-card local">
+          <div class="api-head">
+            <div class="api-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.6" width="6" height="11" rx="3"/><path d="M5.5 11.4a6.5 6.5 0 0 0 13 0M12 17.9V21M9 21h6"/></svg>
+            </div>
+            <div><div class="t">本地 TTS</div><div class="s">F5-TTS / GPT-SoVITS · 音色克隆</div></div>
+            <div class="state"><span class="dot run"></span>未启动</div>
+          </div>
+          <div class="api-body">
+            <div class="field-row">
+              <div class="field"><label>服务地址</label><input value="http://127.0.0.1:9880"></div>
+              <div class="field"><label>引擎</label><select><option>GPT-SoVITS v2</option><option>F5-TTS</option></select></div>
+            </div>
+            <div class="field"><label>参考音频（每个角色一条）</label><input value="assets\voice_ref\heroine_ref.wav" ></div>
+            <div class="field"><label>参考文本</label><input value="今天……也没能说出那句话。"></div>
+          </div>
+          <div class="api-foot">
+            <button class="btn sm test" data-name="本地 TTS">测试连接</button>
+            <span class="hint bad">连接被拒绝 · 请先启动服务</span>
+          </div>
+        </div>
+
+        <div class="api-card local" style="--accent:linear-gradient(180deg,#a78bfa,#6366f1)">
+          <div class="api-head">
+            <div class="api-ico">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 3.8 8v8L12 20.5 20.2 16V8L12 3.5Z"/><path d="m3.8 8 8.2 4.6L20.2 8"/><path d="M12 12.6V20"/></svg>
+            </div>
+            <div><div class="t">本地 LLM（可选）</div><div class="s">Ollama / LM Studio · OpenAI 兼容</div></div>
+            <div class="state"><span class="dot"></span>未配置</div>
+          </div>
+          <div class="api-body">
+            <div class="field"><label>Base URL</label><input placeholder="http://127.0.0.1:11434/v1"></div>
+            <div class="field-row">
+              <div class="field"><label>模型</label><input placeholder="qwen2.5:14b"></div>
+              <div class="field"><label>用途</label><select><option>不启用</option><option>只做润色</option><option>全部本地</option></select></div>
+            </div>
+          </div>
+          <div class="api-foot">
+            <button class="btn sm test" data-name="本地 LLM">测试连接</button>
+            <span class="hint">不填则回落到云端剧本模型</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="setup-bar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round"><path d="m4 12.5 5 5L20 6.5"/></svg>
+        <div class="txt" id="setupHint">填好密钥点「测试连接」，全绿就能进下一步。</div>
+        <div class="spacer"></div>
+        <div class="mode-switch" id="modeSwitch">
+          <button data-mode="mock" class="on">模拟数据</button>
+          <button data-mode="real">真后端</button>
+        </div>
+        <button class="btn ghost" id="btnResetKeys">清空密钥</button>
+        <button class="btn primary" id="btnToEditor">保存并进入编排
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 视图 2：编辑器 ======================= -->
+<section class="view" id="view-editor">
+  <div class="editor">
+
+    <!-- 左侧需求区 -->
+    <aside class="sidebar">
+      <div class="sb-scroll">
+
+        <div class="sb-block">
+          <!-- 项目名：只读显示。原来那个可编辑输入框已经按主人要求撤掉 -->
+          <div class="proj-title">
+            <span class="proj-dot">鲸</span><b id="projTitle">未命名项目</b>
+          </div>
+          <!-- 素材库属于「这个项目」：入口放在项目信息下面，不在顶部导航 -->
+          <button class="btn sm ghost proj-assets-btn" id="btnOpenAssets" title="打开本项目的素材库：参考图 / 语音 / 已生成的背景立绘">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            本项目素材库
+          </button>
+        </div>
+
+        <div class="sb-block">
+          <div class="sb-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            需求描述
+          </div>
+          <textarea class="req" id="reqText">一个雨夜，天台。主角和从小一起长大的她说好要一起离开这座城。她先到了，手里攥着两张车票。十年之约，两条分支，一个真结局一个坏结局，对话克制、留白，不要独白太多。</textarea>
+          <div class="req-tools">
+            <button class="chip" id="btnFillDemo">用示例填充</button>
+            <div class="grow"></div>
+            <span style="font-size:11px;color:var(--dim2)" id="reqCount">0 字</span>
+          </div>
+        </div>
+
+        <div class="sb-block">
+          <div class="sb-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+            生成参数
+          </div>
+          <div class="kv">
+            <div class="field">
+              <label>目标节点数 <span class="range-hint" id="lblEstimate">预计游玩 8 分钟</span></label>
+              <div class="range-row"><input type="range" min="4" max="2000" step="4" value="488" id="rngNodes"><b id="lblNodes">488</b></div>
+            </div>
+            <div class="field">
+              <label>必要分支 <span class="range-hint">定结局数</span></label>
+              <div class="range-row"><input type="range" min="1" max="10" step="1" value="2" id="rngKey"><b id="lblKey">2</b></div>
+            </div>
+            <div class="field">
+              <label>气氛分支 <span class="range-hint">只换对话</span></label>
+              <div class="range-row"><input type="range" min="0" max="120" step="1" value="8" id="rngFlavor"><b id="lblFlavor">8</b></div>
+            </div>
+            <div class="field">
+              <label>分支嵌套 <span class="range-hint">最多几层</span></label>
+              <div class="range-row"><input type="range" min="0" max="4" value="2" id="rngBranch"><b id="lblBranch">2</b></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap">
+            <button class="chip on" id="chipVoice" data-param="auto_voice" title="生成时自动合成语音；关掉只出文字">自动配音</button>
+            <button class="chip on" id="chipConsist" data-param="consistency" title="所有节点共用同一张角色参考图；关掉每个节点各画一张">角色一致性</button>
+            <button class="chip" id="chipReview" data-param="review_per_node" title="生成完逐个节点过审，每个节点点「通过」或「驳回并写理由」，驳回的可单独重画">逐节点审核</button>
+            <button class="chip" id="chipFinal" data-param="final_check" title="全部生成完后，多跑一个独立的质检 Agent 把成品完整查一遍，给判定和分数">收尾验证</button>
+          </div>
+        </div>
+
+        <div class="sb-block chapter-block" id="chapterPanel" hidden>
+          <div class="sb-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5h6l2 3h8v11H4Z"/></svg>
+            章节导航
+            <button class="chapter-all" id="btnShowAll" type="button">显示全部</button>
+          </div>
+          <div class="chapter-tree" id="chapterTree"></div>
+        </div>
+
+        <button class="gen-btn" id="btnGenerate">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/></svg>
+          <span id="genLabel">开始生成剧情</span>
+        </button>
+
+        <div class="generation-progress" id="generationProgress" hidden>
+          <div class="gp-head"><b id="gpAgent">准备生成</b><span id="gpPercent">0%</span></div>
+          <div class="gp-stage" id="gpChapter">等待任务启动</div>
+          <div class="gp-track"><i id="gpBar"></i></div>
+          <div class="gp-foot"><span id="gpNodes">已写 0 / 目标 0 节点</span><button class="btn sm ghost" id="btnCancelGeneration" type="button">取消</button></div>
+        </div>
+
+        <div class="sb-block">
+          <div class="sb-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.2 19c.6-3.2 2.9-5 5.8-5s5.2 1.8 5.8 5"/><circle cx="17" cy="9.4" r="2.3"/><path d="M15.6 18.8c.3-2.2 1.6-3.6 3.4-3.9"/></svg>
+            Agent 流水线
+            <span class="n" id="agentSummary">待启动</span>
+          </div>
+          <div class="agents" id="agents">
+            <div class="agent" data-k="writer">
+              <div class="av">✍</div>
+              <div><div class="nm">编剧 Agent</div><div class="ds">大纲 → 分支结构 → 台词</div></div>
+              <div class="st">待机</div>
+              <div class="bar"><i></i></div>
+            </div>
+            <div class="agent" data-k="art">
+              <div class="av">🎨</div>
+              <div><div class="nm">美术 Agent ×3</div><div class="ds">背景 / 立绘 / 角色一致性</div></div>
+              <div class="st">待机</div>
+              <div class="bar"><i></i></div>
+            </div>
+            <div class="agent" data-k="voice">
+              <div class="av">🎙</div>
+              <div><div class="nm">配音 Agent</div><div class="ds">逐句合成 → 时长对齐</div></div>
+              <div class="st">待机</div>
+              <div class="bar"><i></i></div>
+            </div>
+            <div class="agent" data-k="build">
+              <div class="av">🧩</div>
+              <div><div class="nm">装配 Agent</div><div class="ds">回写节点 → 布局 → 校验</div></div>
+              <div class="st">待机</div>
+              <div class="bar"><i></i></div>
+            </div>
+            <div class="agent" data-k="review">
+              <div class="av">🔎</div>
+              <div><div class="nm">质检 Agent</div><div class="ds">结构 → 文本 → 素材 → 判定</div></div>
+              <div class="st">按需</div>
+              <div class="bar"><i></i></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sb-block">
+          <div class="sb-title" id="logToggle" style="cursor:pointer">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M4 12h16M4 18h8"/><circle cx="17" cy="6" r="2"/><circle cx="14" cy="18" r="2"/></svg>
+            生成日志
+            <span class="n" id="logState">展开</span>
+          </div>
+          <div id="logBox" style="display:none;font-family:Consolas,monospace;font-size:11px;line-height:1.8;color:var(--dim);max-height:120px;overflow-y:auto;white-space:pre-wrap">[--:--:--] 等待开始…
+</div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- 右侧节点画布 -->
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="toolbar">
+        <button class="tb" id="btnUndo" title="撤销 (Ctrl+Z)">↶</button>
+        <button class="tb" id="btnRedo" title="重做 (Ctrl+Y)">↷</button>
+        <div class="sep"></div>
+        <button class="tb" id="zoomOut" title="缩小">−</button>
+        <div class="zoominfo" id="zoomInfo">100%</div>
+        <button class="tb" id="zoomIn" title="放大">+</button>
+        <div class="sep"></div>
+        <button class="tb" id="btnFit" title="适应窗口">适应</button>
+        <button class="tb" id="btnLayout" title="自动排布">自动排布</button>
+        <div class="sep"></div>
+        <button class="tb" id="btnSave" title="立即保存到后端 (Ctrl+S)。平时改动会自动保存">保存</button>
+        <span class="save-state" id="saveState"></span>
+        <button class="tb" id="btnNewProjectTb" title="开始一个新项目（旧项目保留在后端）">新建项目</button>
+        <button class="tb" id="btnAdd" title="添加节点">+ 节点</button>
+        <button class="tb danger" id="btnClearCanvas" title="清空当前画布的所有节点（点之前会二次确认）">清空画布</button>
+        <button class="tb" id="btnPlay" title="从头试玩">▶ 试玩</button>
+      </div>
+
+      <div class="legend">
+        <span><i style="background:#3b82f6"></i>序章</span>
+        <span><i style="background:#22c55e"></i>场景</span>
+        <span><i style="background:#f59e0b"></i>选择</span>
+        <span><i style="background:#dc2626"></i>结局</span>
+        <span style="color:var(--dim2)">Alt+拖动 切断 · 点线 Delete 断开</span>
+      </div>
+
+      <div class="add-menu" id="addMenu">
+        <div class="am-t">新建节点</div>
+        <button data-type="scene"><i style="background:#059669"></i><span><b>场景</b><em>一段剧情</em></span></button>
+        <button data-type="choice"><i style="background:#d97706"></i><span><b>分支</b><em>多个选项</em></span></button>
+        <button data-type="ending"><i style="background:#dc2626"></i><span><b>结局</b><em>故事终点</em></span></button>
+        <button data-type="start"><i style="background:#2563eb"></i><span><b>序章</b><em>故事起点</em></span></button>
+      </div>
+
+      <div class="world" id="world">
+        <canvas id="galCanvas" class="gal-canvas"></canvas>
+      </div>
+
+      <!-- 属性面板 -->
+      <div class="inspector" id="inspector">
+        <div class="ih">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d946ef" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h10M4 17h7"/></svg>
+          <span id="insTitle">节点属性</span>
+          <button class="x" id="insClose">✕</button>
+        </div>
+        <div class="ib" id="insBody">
+          <div class="ins-tip" id="insTip">选中一个节点，改它的背景、立绘、语音和分支</div>
+          <div id="insFields"></div>
+          <div class="act">
+            <button class="btn sm" id="btnRegen">重新生成本节点</button>
+            <button class="btn sm ghost" id="btnDel">删除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======================= 素材库 ======================= -->
+<section class="view" id="view-assets">
+  <div class="view-inner assets-page">
+    <!-- 素材库属于某个具体项目：顶部给一条返回项目内的路径，免得看着像全局功能 -->
+    <div class="assets-crumb">
+      <button class="btn sm ghost" id="btnBackToEditor">← 回到剧情编排</button>
+      <span class="assets-crumb-hint">素材库跟着项目走：换项目就在「剧情编排」里重新进</span>
+    </div>
+    <div class="asset-no-project" id="assetNoProject" hidden>
+      <b>还没有打开项目</b>
+      <span>素材库属于某个项目 —— 先从「项目」页打开一个项目，再到「剧情编排」里点「本项目素材库」。</span>
+    </div>
+    <div class="assets-hero">
+      <div>
+        <div class="eyebrow">Asset Atelier / Library</div>
+        <h1 class="page-title">让每一份灵感，各归其位</h1>
+        <p class="page-sub">参考图决定生成方向，语音标注到角色；所有素材统一预览、试听与管理。</p>
+      </div>
+      <div class="assets-status"><span class="dot ok"></span><span id="assetProjectName">演示项目</span><button class="btn sm ghost" id="btnRefreshAssets">刷新</button></div>
+    </div>
+    <div class="asset-error" id="assetGlobalError" hidden></div>
+
+    <div class="asset-workbench">
+      <section class="asset-panel ref-panel">
+        <div class="asset-panel-head"><div><span class="asset-kicker">VISUAL INPUT</span><h2>参考图</h2></div><span class="asset-count" id="refCount">0 张</span></div>
+        <div class="ref-drop" id="refDrop" tabindex="0" role="button" aria-label="上传参考图">
+          <input type="file" id="refFile" accept="image/png,image/jpeg" multiple hidden>
+          <div class="drop-orb">＋</div><b>拖拽图片到这里，或点击选择</b><span>PNG / JPEG · 单张不超过 20 MB</span>
+          <div class="ref-kind-picker"><button type="button" class="on" data-ref-kind="character">角色立绘参考</button><button type="button" data-ref-kind="scene">场景风格参考</button></div>
+          <select id="refCharacter" title="这张参考图是谁" aria-label="这张参考图是谁"><option value="">不指定角色（传完再选也行）</option></select>
+          <div class="ref-char-hint" id="refCharHint">角色参考请在上面的下拉里选「这是谁」；场景参考不用选</div>
+        </div>
+        <div class="asset-inline-error" id="refError" role="alert" hidden></div>
+        <div class="ref-columns">
+          <div><h3><i class="violet"></i>角色立绘参考 <span id="charRefCount">0</span></h3><div class="ref-list" id="characterRefs"><div class="asset-empty">还没有角色参考图</div></div></div>
+          <div><h3><i class="cyan"></i>场景风格参考 <span id="sceneRefCount">0</span></h3><div class="ref-list" id="sceneRefs"><div class="asset-empty">还没有场景参考图</div></div></div>
+        </div>
+      </section>
+
+      <section class="asset-panel voice-panel">
+        <div class="asset-panel-head"><div><span class="asset-kicker">AUDIO INPUT</span><h2>语音素材</h2></div><span class="asset-count" id="voiceCount">0 条</span></div>
+        <div class="voice-drop" id="voiceDrop" tabindex="0" role="button" aria-label="上传语音">
+          <input type="file" id="voiceFile" accept=".wav,.mp3,.ogg,.m4a,audio/*" multiple hidden>
+          <div class="voice-drop-icon">♪</div><div><b>拖入或选择语音</b><span>WAV / MP3 / OGG / M4A · ≤ 20 MB</span></div>
+          <select id="voiceCharacter" title="上传时标注角色"><option value="">未标注角色</option></select>
+        </div>
+        <div class="asset-inline-error" id="voiceError" role="alert" hidden></div>
+        <div class="voice-list" id="voiceList"><div class="asset-empty">上传语音后，可在这里试听并查看角色标注</div></div>
+      </section>
+    </div>
+
+    <div class="sec-head library-head"><h2>全部素材</h2><div class="ln"></div><span class="tag" id="librarySummary">正在读取…</span></div>
+    <div class="library-tabs" id="libraryTabs"><button class="on" data-lib="roles">角色 <span>0</span></button><button data-lib="background">背景 <span>0</span></button><button data-lib="character">立绘 <span>0</span></button><button data-lib="reference">参考图 <span>0</span></button><button data-lib="voice">语音 <span>0</span></button></div>
+    <div class="library-grid" id="libraryGrid"></div>
+  </div>
+</section>
+
+<!-- ======================= 视图 3：导出 ======================= -->
+<section class="view" id="view-export">
+  <div class="view-inner">
+    <div class="eyebrow">Step 03 / Ship</div>
+    <h1 class="page-title">把故事变成能玩的东西</h1>
+    <p class="page-sub">节点图是唯一真源。同一条线可以同时导出成 Ren'Py 工程、网页播放器、或一条录像。</p>
+
+    <!-- 一键打包：成品信息 + 格式勾选 + 结果 -->
+    <div class="pack-wrap">
+      <div class="pack-card">
+        <div class="pack-card-head">成品信息</div>
+        <div class="pack-field">
+          <span>游戏名称</span>
+          <input id="packTitle" maxlength="60" placeholder="打包出来的游戏叫什么；留空用项目名">
+        </div>
+        <div class="pack-field">
+          <span>游戏图标</span>
+          <div class="pack-icon-row">
+            <div class="pack-icon" id="packIcon">没选</div>
+            <button class="btn sm" id="packIconPick">选图片</button>
+            <button class="btn sm ghost" id="packIconClear">清除</button>
+          </div>
+          <input type="file" id="packIconFile" accept="image/png,image/jpeg,image/x-icon" hidden>
+        </div>
+        <p class="pack-tip">图标建议 256×256 PNG / ICO，不超过 256KB。exe、网页版、Ren'Py 都会用它。</p>
+      </div>
+
+      <div class="pack-card">
+        <div class="pack-card-head">要出什么</div>
+        <label class="pack-opt"><input type="checkbox" id="packRenpy" checked>
+          <div><b>Ren'Py 工程</b><span>可继续手改，能发布 Steam / itch.io</span></div></label>
+        <label class="pack-opt"><input type="checkbox" id="packWeb" checked>
+          <div><b>网页播放器</b><span>单文件夹 HTML5，丢服务器或手机都能玩</span></div></label>
+        <label class="pack-opt"><input type="checkbox" id="packExe">
+          <div><b>Windows exe</b><span>Unity 构建，双击即玩；首次 3–10 分钟</span></div></label>
+        <p class="pack-tip">exe 走 Unity 构建，比另外两个慢很多，构建期间别关窗口。</p>
+      </div>
+    </div>
+
+    <!-- 界面风格：按文字要求 + 参考图设计主界面 / 对话界面 -->
+    <div class="pack-card" id="uiDesignCard">
+      <div class="pack-card-head">界面风格</div>
+      <div class="pack-field">
+        <span>风格要求</span>
+        <textarea id="uiRequirement" maxlength="800" rows="3" placeholder="例如：江南雨夜、水墨留白、安静克制；标题竖排，强调色用暗红"></textarea>
+      </div>
+      <div class="pack-field">
+        <span>参考图</span>
+        <div class="ui-ref-drop" id="uiRefDrop">拖图片到这里，或 <button class="btn sm ghost" id="uiRefPick">选图片</button></div>
+        <input type="file" id="uiRefFile" accept="image/png,image/jpeg,image/webp" multiple hidden>
+        <div class="ui-ref-preview" id="uiRefPreview"></div>
+      </div>
+      <div class="pack-field">
+        <span>设计哪块</span>
+        <div class="ui-target-row">
+          <label><input type="radio" name="uiTarget" value="both" checked> 主界面 + 对话界面</label>
+          <label><input type="radio" name="uiTarget" value="title"> 只要主界面</label>
+          <label><input type="radio" name="uiTarget" value="dialog"> 只要对话界面</label>
+        </div>
+      </div>
+      <p class="pack-tip">不填要求、不上参考图也能出：会用项目题材挑最贴近的一套。参考图只用来取色和气质，不进成品。</p>
+      <div class="pack-actions" style="margin-top:14px">
+        <button class="btn primary" id="btnDesignUi">设计界面</button>
+        <span class="pack-state" id="uiDesignState"></span>
+      </div>
+      <div class="ui-design-result" id="uiDesignResult" hidden></div>
+    </div>
+
+    <div class="pack-actions">
+      <button class="btn primary" id="btnPack">开始打包</button>
+      <button class="btn ghost sm" id="btnOpenPackDir">打开输出目录</button>
+      <span class="pack-state" id="packState"></span>
+    </div>
+    <div class="pack-results" id="packResults" hidden></div>
+
+    <div class="sec-head"><h2>或者单独导出某一项</h2><div class="ln"></div></div>
+    <div class="export-grid" style="margin-top:24px">
+      <div class="exp-card">
+        <div class="ei"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9.5v5l4-2.5-4-2.5Z"/></svg></div>
+        <h3>Ren'Py 工程</h3>
+        <p>生成 script.rpy + 资源目录，装好 Ren'Py SDK 直接双击运行，能继续手改、能发布到 Steam / itch.io。</p>
+        <div class="tgt">D:\GalgameStudio\out\雨停之前\game\script.rpy</div>
+        <button class="btn primary sm exp-btn" data-format="renpy" style="justify-self:start">导出 Ren'Py</button>
+      </div>
+      <div class="exp-card">
+        <div class="ei"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="M3 8.5h18M6.4 6.5h.01M9 6.5h.01"/></svg></div>
+        <h3>网页播放器</h3>
+        <p>单文件夹 HTML5 版本，丢到任何静态服务器就能玩，手机浏览器也适配。</p>
+        <div class="tgt">D:\GalgameStudio\out\雨停之前\web\index.html</div>
+        <button class="btn primary sm exp-btn" data-format="web" style="justify-self:start">导出网页版</button>
+      </div>
+      <div class="exp-card unity-card">
+        <div class="ei"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg></div>
+        <h3>Unity 桌面版 <span class="unity-badge">.EXE</span></h3>
+        <p>生成 Unity 工程并自动构建 Windows 可执行文件，双击即玩，无需安装编辑器。</p>
+        <div class="tgt">export\unity\雨停之前.exe</div>
+        <button class="btn primary sm unity-exp-btn" id="btnExportUnity" data-format="unity" style="justify-self:start">导出 Unity（.exe）</button>
+        <div class="unity-progress" id="unityProgress" hidden>
+          <div><b>正在构建，别关窗口</b><span id="unityPercent">0%</span></div>
+          <p id="unityStage">准备 Unity 工程，通常需要 3–10 分钟</p>
+          <div class="unity-track"><i id="unityBar"></i></div>
+        </div>
+        <div class="asset-inline-error" id="unityError" role="alert" hidden></div>
+      </div>
+      <div class="exp-card">
+        <div class="ei"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 11 5-3v8l-5-3Z"/></svg></div>
+        <h3>录像 / 宣传片</h3>
+        <p>按节点顺序自动播放并录屏，带配音与字幕，直接出一条可发布的剧情剪辑。</p>
+        <div class="tgt">D:\GalgameStudio\out\雨停之前\trailer\main.mp4</div>
+        <button class="btn primary sm exp-btn" data-format="video" style="justify-self:start">导出录像</button>
+      </div>
+    </div>
+
+    <div class="sec-head"><h2>工程结构预览</h2><div class="ln"></div><span class="tag">与节点图一一对应</span></div>
+    <div class="exp-tree">雨停之前/
+├── <b>project.json</b>            <span class="c"># 项目元信息 / 角色表 / 接口指纹</span>
+├── <b>graph.json</b>              <span class="c"># 节点 + 连线（唯一真源）</span>
+├── script.rpy                 <span class="c"># Ren'Py 剧本（自动生成）</span>
+├── assets/
+│   ├── bg/    <span class="c">夜景_天台.png  黄昏_走廊.png  清晨_教室.png …</span>
+│   ├── char/  <span class="c">heroine_平静.png  heroine_低头.png  heroine_回头.png …</span>
+│   ├── voice/ <span class="c">n05_01.wav  n05_02.wav  n09_01.wav …</span>
+│   └── ui/    <span class="c">dialogue_box.png  name_plate.png</span>
+├── prompts/
+│   └── <b>used.jsonl</b>            <span class="c"># 每个资产的正负词 + seed + 模型，可复现</span>
+└── export/
+    ├── web/    <span class="c">index.html + assets</span>
+    └── video/  <span class="c">main.mp4</span></div>
+
+    <div class="sec-head">
+      <h2>Ren'Py 脚本预览</h2><div class="ln"></div>
+      <span class="tag">图上改完点刷新</span>
+      <button class="btn sm" id="btnRpy">刷新</button>
+    </div>
+    <pre class="exp-tree" id="rpyPreview">切到这一页会自动生成…</pre>
+  </div>
+</section>
+
+</main>
+
+<!-- ======================= 试玩弹窗 ======================= -->
+<div class="modal" id="player">
+  <div class="stage-wrap">
+    <div class="stage-top">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d946ef" stroke-width="2" stroke-linecap="round"><path d="M7 4.5v15l12-7.5-12-7.5Z"/></svg>
+      <b style="color:var(--txt)">试玩预览</b>
+      <span id="plNode" style="font-family:Consolas,monospace">node_01</span>
+      <div class="grow"></div>
+      <span>点击画面推进 · Esc 退出</span>
+      <button class="btn sm ghost" id="plBack">← 上一句</button>
+      <button class="btn sm ghost" id="plRestart">⟲ 重来</button>
+      <button class="btn sm ghost" id="plClose">关闭</button>
+    </div>
+    <div class="stage" id="stage">
+      <div class="bg rainy" id="pBg"></div>
+      <div class="rain" id="pRain"></div>
+      <div class="char" id="pChar">
+        <svg class="silhouette" viewBox="0 0 200 400" preserveAspectRatio="xMidYMax meet">
+          <defs>
+            <radialGradient id="silHead" cx="40%" cy="28%" r="78%">
+              <stop offset="0" stop-color="#8a7cbb"/>
+              <stop offset="0.55" stop-color="#4d4270"/>
+              <stop offset="1" stop-color="#2e2745"/>
+            </radialGradient>
+            <linearGradient id="silBody" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#4f4375"/>
+              <stop offset="0.35" stop-color="#2e2744"/>
+              <stop offset="1" stop-color="#120f1d"/>
+            </linearGradient>
+            <radialGradient id="silGlow" cx="50%" cy="34%" r="58%">
+              <stop offset="0" stop-color="#9d7bf0" stop-opacity="0.24"/>
+              <stop offset="1" stop-color="#9d7bf0" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="silSoft" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="1.4"/>
+            </filter>
+          </defs>
+          <ellipse cx="100" cy="200" rx="96" ry="205" fill="url(#silGlow)"/>
+          <g filter="url(#silSoft)">
+            <ellipse cx="100" cy="300" rx="86" ry="130" fill="url(#silBody)"/>
+            <ellipse cx="100" cy="202" rx="74" ry="64" fill="url(#silBody)"/>
+            <ellipse cx="100" cy="100" rx="45" ry="49" fill="url(#silHead)"/>
+          </g>
+        </svg>
+      </div>
+      <div class="chars" id="pChars"></div>
+      <audio id="pVoiceAudio" preload="auto"></audio>
+      <div class="vignette"></div>
+      <div class="dialogue" id="pDlg">
+        <div class="who" id="pWho">她</div>
+        <div class="txt" id="pTxt"></div>
+        <div class="nxt">▾ 点击继续</div>
+      </div>
+      <div class="choices" id="pChoices"><div class="box" id="pChoiceBox"></div></div>
+      <div class="ending" id="pEnding" style="display:none">
+        <div>
+          <div class="t" id="pEndTitle">真结局</div>
+          <div class="s" id="pEndSub">雨停之前</div>
+        </div>
+      </div>
+    </div>
+    <div class="stage-bottom meta-strip">
+      <span>节点 <b id="plIdx">1</b>/<b id="plTotal">9</b></span>
+      <span>语音 <b id="plVoice">4.2s</b></span>
+      <span>分支 <b id="plBranches">2</b></span>
+      <div style="flex:1"></div>
+      <span style="color:var(--dim2)">这是模拟数据 · 真实播放时读 assets/voice 与 assets/bg</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 素材选择浮层：必须放在 app.js 之前，否则脚本里 addEventListener 拿到 null 会整段抛错 -->
+<div class="picker-mask" id="pickerMask" hidden>
+  <div class="picker">
+    <div class="picker-h">
+      <span id="pickerTitle">选择素材</span>
+      <span class="picker-count" id="pickerCount"></span>
+      <button class="x" id="pickerClose" type="button">✕</button>
+    </div>
+    <div class="picker-grid" id="pickerGrid"></div>
+  </div>
+</div>
+
+<!-- Qwen-TTS 音色候选（取自百炼官方音色列表，以官方文档为准：
+     https://help.aliyun.com/zh/model-studio/qwen-tts-voice-list） -->
+<datalist id="voicePresets">
+  <option value="Cherry">芊悦 · 阳光积极、亲切自然（女）</option>
+  <option value="Serena">苏瑶 · 温柔小姐姐（女）</option>
+  <option value="Ethan">晨煦 · 阳光温暖带北方口音（男）</option>
+  <option value="Chelsie">千雪 · 二次元虚拟女友（女）</option>
+  <option value="Momo">茉兔 · 撒娇搞怪（女）</option>
+  <option value="Vivian">十三 · 拽拽的小暴躁（女）</option>
+  <option value="Moon">月白 · 率性帅气（男）</option>
+  <option value="Maia">四月 · 知性与温柔（女）</option>
+  <option value="Kai">凯 · 耳朵的 SPA（男）</option>
+  <option value="Nofish">不吃鱼 · 不会翘舌音的设计师（男）</option>
+  <option value="Bella">萌宝 · 小萝莉（女）</option>
+</datalist>
+
+<script>
+  window.addEventListener('error', function (e) {
+    document.title = 'ERR ' + (e.message || '') + ' @' + (e.filename || '').split('/').pop() + ':' + (e.lineno || 0);
+  });
+</script>
+<!-- 属性面板的图片大图浮层（点背景 / 立绘预览打开；必须放在 app.js 之前） -->
+<div class="ins-zoom" id="insZoom" hidden>
+  <button type="button" class="ins-zoom-x" id="insZoomClose" aria-label="关闭大图">✕</button>
+  <img id="insZoomImg" alt="">
+</div>
+
+<script src="api.js?v=20261109b"></script>
+<script src="vendor/litegraph.js?v=17943091473257"></script>
+<script src="graph-editor.js?v=17943091473257"></script>
+<script src="app.js?v=20261110a"></script>
+<script src="assets.js?v=17943091473257"></script>
+<script src="e2e.js?v=17943091473257"></script>
+<script src="frontend-verify.js?v=17943091473257"></script>
+</body>
+</html>

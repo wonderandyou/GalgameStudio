@@ -1,0 +1,2595 @@
+{
+ "version": 1,
+ "project": {
+  "id": "p_63b2b758e0ab46d1bf4201629468eb36",
+  "name": "真模型测试-40",
+  "resolution": [
+   1920,
+   1080
+  ],
+  "created_at": "2026-11-07T04:59:10.914332+00:00"
+ },
+ "characters": [
+  {
+   "id": "heroine",
+   "name": "她",
+   "color": "#d946ef",
+   "ref_image": "assets/ref/mock.png",
+   "voice_id": "mock"
+  },
+  {
+   "id": "hero",
+   "name": "我",
+   "color": "#3b82f6",
+   "ref_image": "assets/char/ae6c79d10f1fd4106507.png",
+   "voice_id": ""
+  }
+ ],
+ "nodes": [
+  {
+   "id": "n1",
+   "type": "start",
+   "title": "起点",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "占位背景，可随时替换",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "故事从这里开始",
+     "voice": "assets/voice/silent_1.556.wav",
+     "dur": 1.556
+    }
+   ],
+   "pos": {
+    "x": 260,
+    "y": 385
+   },
+   "gen": {
+    "model": "manual",
+    "at": "2026-11-07T04:59:11.517754+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n2",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n2",
+   "type": "scene",
+   "title": "天台·雨",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "门推开的时候，雨声一下子大了",
+     "voice": "assets/voice/silent_3.111.wav",
+     "dur": 3.111
+    },
+    {
+     "who": "",
+     "text": "她站在围栏边上，没打伞",
+     "voice": "assets/voice/silent_2.444.wav",
+     "dur": 2.444
+    }
+   ],
+   "pos": {
+    "x": 600,
+    "y": 385
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:28.197610+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n3",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n3",
+   "type": "scene",
+   "title": "走过去",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "紧张"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "hero",
+     "text": "我把伞撑开，走到她旁边",
+     "voice": "assets/voice/silent_2.444.wav",
+     "dur": 2.444
+    },
+    {
+     "who": "hero",
+     "text": "雨砸在伞面上，响得像敲鼓",
+     "voice": "assets/voice/silent_2.667.wav",
+     "dur": 2.667
+    }
+   ],
+   "pos": {
+    "x": 940,
+    "y": 385
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:28.197610+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n4",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n4",
+   "type": "scene",
+   "title": "伞在中间",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "伞停在两个人中间",
+     "voice": "assets/voice/silent_1.778.wav",
+     "dur": 1.778
+    },
+    {
+     "who": "",
+     "text": "谁都没往那边靠一点",
+     "voice": "assets/voice/silent_2.000.wav",
+     "dur": 2.0
+    }
+   ],
+   "pos": {
+    "x": 1280,
+    "y": 385
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:28.197610+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n5",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n5",
+   "type": "choice",
+   "title": "把伞递过去",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "hero",
+     "text": "伞柄朝她那边偏一点",
+     "voice": "assets/voice/silent_2.000.wav",
+     "dur": 2.0
+    },
+    {
+     "who": "hero",
+     "text": "「拿着」",
+     "voice": "assets/voice/silent_0.889.wav",
+     "dur": 0.889
+    }
+   ],
+   "pos": {
+    "x": 1620,
+    "y": 385
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:28.197610+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "「拿着」",
+     "to": "n6",
+     "condition": null
+    },
+    {
+     "label": "什么都不说，把伞举到她头顶",
+     "to": "n9",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n6",
+   "type": "scene",
+   "title": "她没接",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "冷淡"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "尴尬"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "「不用」",
+     "voice": "assets/voice/silent_0.889.wav",
+     "dur": 0.889
+    },
+    {
+     "who": "heroine",
+     "text": "她的手插在口袋里，一直没动",
+     "voice": "assets/voice/silent_2.889.wav",
+     "dur": 2.889
+    }
+   ],
+   "pos": {
+    "x": 1960,
+    "y": 280
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:28.197610+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n7",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n7",
+   "type": "scene",
+   "title": "淋着也行",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "「淋一会儿就习惯了」",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    },
+    {
+     "who": "heroine",
+     "text": "她把额前的头发往后拨，雨水顺着脖子下去",
+     "voice": "assets/voice/silent_4.222.wav",
+     "dur": 4.222
+    }
+   ],
+   "pos": {
+    "x": 2300,
+    "y": 280
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:28.197610+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n8",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n8",
+   "type": "scene",
+   "title": "伞柄发烫",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "center",
+     "mood": "为难"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "hero",
+     "text": "伞柄在我手里被攥得发热",
+     "voice": "assets/voice/silent_2.444.wav",
+     "dur": 2.444
+    },
+    {
+     "who": "hero",
+     "text": "她越是不接，我越不知道该往哪儿放",
+     "voice": "assets/voice/silent_3.556.wav",
+     "dur": 3.556
+    }
+   ],
+   "pos": {
+    "x": 2640,
+    "y": 280
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:28.197610+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n12",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n9",
+   "type": "scene",
+   "title": "举到她头顶",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "微怔"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "伞沿移过去，雨从她肩上停住了",
+     "voice": "assets/voice/silent_3.111.wav",
+     "dur": 3.111
+    },
+    {
+     "who": "",
+     "text": "她侧过脸，看了我一眼",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    }
+   ],
+   "pos": {
+    "x": 1960,
+    "y": 490
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:28.197610+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n10",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n10",
+   "type": "scene",
+   "title": "「你湿了」",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "微怔"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "「你湿了」",
+     "voice": "assets/voice/silent_1.111.wav",
+     "dur": 1.111
+    },
+    {
+     "who": "heroine",
+     "text": "「没事」",
+     "voice": "assets/voice/silent_0.889.wav",
+     "dur": 0.889
+    }
+   ],
+   "pos": {
+    "x": 2300,
+    "y": 490
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:28.197610+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n11",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n11",
+   "type": "scene",
+   "title": "沉默一会儿",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "勉强笑"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "「笨蛋」",
+     "voice": "assets/voice/silent_0.889.wav",
+     "dur": 0.889
+    },
+    {
+     "who": "heroine",
+     "text": "她说完就不再看我了",
+     "voice": "assets/voice/silent_2.000.wav",
+     "dur": 2.0
+    }
+   ],
+   "pos": {
+    "x": 2640,
+    "y": 490
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:28.197610+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n12",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n12",
+   "type": "choice",
+   "title": "问还是不问",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "hero",
+     "text": "「几点的车」",
+     "voice": "assets/voice/silent_1.333.wav",
+     "dur": 1.333
+    },
+    {
+     "who": "hero",
+     "text": "我把声音压得很平",
+     "voice": "assets/voice/silent_1.778.wav",
+     "dur": 1.778
+    }
+   ],
+   "pos": {
+    "x": 2980,
+    "y": 385
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:36.031481+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "「几点的车」",
+     "to": "n13",
+     "condition": null
+    },
+    {
+     "label": "「为什么现在才说」",
+     "to": "n14",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n13",
+   "type": "scene",
+   "title": "五点半",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "平静"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "「五点半」",
+     "voice": "assets/voice/silent_1.111.wav",
+     "dur": 1.111
+    },
+    {
+     "who": "heroine",
+     "text": "「第一班」",
+     "voice": "assets/voice/silent_1.111.wav",
+     "dur": 1.111
+    }
+   ],
+   "pos": {
+    "x": 3320,
+    "y": 385
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:36.031481+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n14",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n14",
+   "type": "scene",
+   "title": "雨小了",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，雨势转小，水汽弥漫，城市灯海在远处铺开，冷蓝到灰白的过渡",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "紧张"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "勉强笑"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "「为什么现在才说」我听见自己在问",
+     "voice": "assets/voice/silent_3.556.wav",
+     "dur": 3.556
+    },
+    {
+     "who": "",
+     "text": "雨小了一截，城市在下面一块一块亮着",
+     "voice": "assets/voice/silent_3.778.wav",
+     "dur": 3.778
+    }
+   ],
+   "pos": {
+    "x": 3660,
+    "y": 385
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T04:59:36.031481+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n15",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n15",
+   "type": "scene",
+   "title": "钥匙",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "雨小了一点，她也终于不再低着头",
+     "voice": "assets/voice/silent_3.333.wav",
+     "dur": 3.333
+    },
+    {
+     "who": "",
+     "text": "她从口袋里摸出一样东西，攥在手心",
+     "voice": "assets/voice/silent_3.556.wav",
+     "dur": 3.556
+    },
+    {
+     "who": "",
+     "text": "攥得太紧，指节都白了",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    }
+   ],
+   "pos": {
+    "x": 260,
+    "y": 1105
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n16",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n16",
+   "type": "scene",
+   "title": "还你",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "怔住"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "这个，还你",
+     "voice": "assets/voice/silent_1.111.wav",
+     "dur": 1.111
+    },
+    {
+     "who": "heroine",
+     "text": "我拿着也没用了",
+     "voice": "assets/voice/silent_1.556.wav",
+     "dur": 1.556
+    }
+   ],
+   "pos": {
+    "x": 600,
+    "y": 1105
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n17",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n17",
+   "type": "scene",
+   "title": "一把旧钥匙",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "一把钥匙，边缘磨得发亮",
+     "voice": "assets/voice/silent_2.444.wav",
+     "dur": 2.444
+    },
+    {
+     "who": "",
+     "text": "是我家楼下那扇门的",
+     "voice": "assets/voice/silent_2.000.wav",
+     "dur": 2.0
+    },
+    {
+     "who": "",
+     "text": "三年前我给她的，那时她说怕我忘了带",
+     "voice": "assets/voice/silent_3.778.wav",
+     "dur": 3.778
+    }
+   ],
+   "pos": {
+    "x": 940,
+    "y": 1105
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n18",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n18",
+   "type": "choice",
+   "title": "接还是不接",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "沉默"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "她的手停在半空，没有收回去",
+     "voice": "assets/voice/silent_2.889.wav",
+     "dur": 2.889
+    },
+    {
+     "who": "",
+     "text": "雨落在钥匙上，一滴一滴",
+     "voice": "assets/voice/silent_2.444.wav",
+     "dur": 2.444
+    }
+   ],
+   "pos": {
+    "x": 1280,
+    "y": 1105
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "接过来",
+     "to": "n19",
+     "condition": null
+    },
+    {
+     "label": "不去拿",
+     "to": "n21",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n19",
+   "type": "scene",
+   "title": "接过来",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "勉强笑"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "沉默"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "我伸手，钥匙比想的凉",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    },
+    {
+     "who": "",
+     "text": "凉得像是刚从水里捞出来",
+     "voice": "assets/voice/silent_2.444.wav",
+     "dur": 2.444
+    },
+    {
+     "who": "",
+     "text": "她说，以后你换锁吧",
+     "voice": "assets/voice/silent_2.000.wav",
+     "dur": 2.0
+    }
+   ],
+   "pos": {
+    "x": 1620,
+    "y": 1000
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n20",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n20",
+   "type": "scene",
+   "title": "换锁",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "沉默"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "不是怕你乱想",
+     "voice": "assets/voice/silent_1.333.wav",
+     "dur": 1.333
+    },
+    {
+     "who": "heroine",
+     "text": "是怕哪天我回来，开了门又觉得不该进",
+     "voice": "assets/voice/silent_3.778.wav",
+     "dur": 3.778
+    }
+   ],
+   "pos": {
+    "x": 1960,
+    "y": 1000
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n23",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n21",
+   "type": "scene",
+   "title": "不去拿",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "别开眼"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "我把手插进兜里，没动",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    },
+    {
+     "who": "",
+     "text": "她的手在空中停了两秒",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    },
+    {
+     "who": "",
+     "text": "然后收回去，钥匙被她重新攥紧",
+     "voice": "assets/voice/silent_3.111.wav",
+     "dur": 3.111
+    }
+   ],
+   "pos": {
+    "x": 1620,
+    "y": 1210
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n22",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n22",
+   "type": "scene",
+   "title": "那你留着",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "勉强笑"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "沉默"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "那你留着吧",
+     "voice": "assets/voice/silent_1.111.wav",
+     "dur": 1.111
+    },
+    {
+     "who": "heroine",
+     "text": "反正我也不打算再用它开哪扇门了",
+     "voice": "assets/voice/silent_3.333.wav",
+     "dur": 3.333
+    }
+   ],
+   "pos": {
+    "x": 1960,
+    "y": 1210
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n23",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n23",
+   "type": "scene",
+   "title": "汇合·钥匙在哪",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "钥匙现在在我们之间的某个地方",
+     "voice": "assets/voice/silent_3.111.wav",
+     "dur": 3.111
+    },
+    {
+     "who": "",
+     "text": "攥在她手里，或者在我口袋里",
+     "voice": "assets/voice/silent_2.889.wav",
+     "dur": 2.889
+    },
+    {
+     "who": "",
+     "text": "都一样——那扇门今晚没人会开",
+     "voice": "assets/voice/silent_3.111.wav",
+     "dur": 3.111
+    }
+   ],
+   "pos": {
+    "x": 2300,
+    "y": 1105
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n24",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n24",
+   "type": "scene",
+   "title": "旧事",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "回忆"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "沉默"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "那天你钥匙丢了，在楼下站了一夜",
+     "voice": "assets/voice/silent_3.333.wav",
+     "dur": 3.333
+    },
+    {
+     "who": "heroine",
+     "text": "我下楼倒垃圾才看见你",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    }
+   ],
+   "pos": {
+    "x": 2640,
+    "y": 1105
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n25",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n25",
+   "type": "scene",
+   "title": "你没问",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "沉默"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "你那时候一句话都不说",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    },
+    {
+     "who": "heroine",
+     "text": "就把伞递给我，自己淋着",
+     "voice": "assets/voice/silent_2.444.wav",
+     "dur": 2.444
+    },
+    {
+     "who": "heroine",
+     "text": "跟今晚一模一样",
+     "voice": "assets/voice/silent_1.556.wav",
+     "dur": 1.556
+    }
+   ],
+   "pos": {
+    "x": 2980,
+    "y": 1105
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n26",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n26",
+   "type": "scene",
+   "title": "第一次说真话",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "怔住"
+    }
+   ],
+   "lines": [
+    {
+     "who": "hero",
+     "text": "我那时候在想，问你名字要怎么问才不奇怪",
+     "voice": "assets/voice/silent_4.222.wav",
+     "dur": 4.222
+    },
+    {
+     "who": "hero",
+     "text": "想了整夜，天亮了也没问出口",
+     "voice": "assets/voice/silent_2.889.wav",
+     "dur": 2.889
+    }
+   ],
+   "pos": {
+    "x": 3320,
+    "y": 1105
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:03.925708+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n27",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n27",
+   "type": "scene",
+   "title": "轮到我问",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "夜晚高楼天台，暴雨，围栏边一个女孩的背影，城市灯光在雨幕里化开，冷蓝色调，地面反光",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "怔住"
+    }
+   ],
+   "lines": [
+    {
+     "who": "hero",
+     "text": "我问她，这把钥匙你还留着",
+     "voice": "assets/voice/silent_2.667.wav",
+     "dur": 2.667
+    },
+    {
+     "who": "hero",
+     "text": "她没马上答",
+     "voice": "assets/voice/silent_1.111.wav",
+     "dur": 1.111
+    },
+    {
+     "who": "hero",
+     "text": "雨声又大了一点点",
+     "voice": "assets/voice/silent_1.778.wav",
+     "dur": 1.778
+    }
+   ],
+   "pos": {
+    "x": 3660,
+    "y": 1105
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:09.746209+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n28",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n28",
+   "type": "scene",
+   "title": "车灯·远处",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "楼下的路上有车灯扫过来，又走了",
+     "voice": "assets/voice/silent_3.333.wav",
+     "dur": 3.333
+    },
+    {
+     "who": "",
+     "text": "雨已经小到听不见声音",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    }
+   ],
+   "pos": {
+    "x": 260,
+    "y": 1825
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n29",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n29",
+   "type": "scene",
+   "title": "末班车",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "末班车是十一点四十",
+     "voice": "assets/voice/silent_2.000.wav",
+     "dur": 2.0
+    },
+    {
+     "who": "heroine",
+     "text": "还有一个钟头",
+     "voice": "assets/voice/silent_1.333.wav",
+     "dur": 1.333
+    }
+   ],
+   "pos": {
+    "x": 600,
+    "y": 1825
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n30",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n30",
+   "type": "scene",
+   "title": "她的行李",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "她脚边只有一个背包，看着不像要搬去很远",
+     "voice": "assets/voice/silent_4.222.wav",
+     "dur": 4.222
+    },
+    {
+     "who": "",
+     "text": "像只是出门买点东西",
+     "voice": "assets/voice/silent_2.000.wav",
+     "dur": 2.0
+    }
+   ],
+   "pos": {
+    "x": 940,
+    "y": 1825
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n31",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n31",
+   "type": "scene",
+   "title": "不问她",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "hero",
+     "text": "我没问她要坐去哪的车",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    },
+    {
+     "who": "hero",
+     "text": "问了她就得给一个理由，理由给了就得留下来解释",
+     "voice": "assets/voice/silent_4.889.wav",
+     "dur": 4.889
+    }
+   ],
+   "pos": {
+    "x": 1280,
+    "y": 1825
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n32",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n32",
+   "type": "scene",
+   "title": "表",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "勉强笑"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "你别一直看表",
+     "voice": "assets/voice/silent_1.333.wav",
+     "dur": 1.333
+    },
+    {
+     "who": "heroine",
+     "text": "看表就说明你在等什么",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    },
+    {
+     "who": "heroine",
+     "text": "我不太想被人等着",
+     "voice": "assets/voice/silent_1.778.wav",
+     "dur": 1.778
+    }
+   ],
+   "pos": {
+    "x": 1620,
+    "y": 1825
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n33",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n33",
+   "type": "scene",
+   "title": "那就不看",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "hero",
+     "text": "我把手插回口袋",
+     "voice": "assets/voice/silent_1.556.wav",
+     "dur": 1.556
+    },
+    {
+     "who": "hero",
+     "text": "表在口袋里还是走的",
+     "voice": "assets/voice/silent_2.000.wav",
+     "dur": 2.0
+    },
+    {
+     "who": "hero",
+     "text": "两个人都听得见",
+     "voice": "assets/voice/silent_1.556.wav",
+     "dur": 1.556
+    }
+   ],
+   "pos": {
+    "x": 1960,
+    "y": 1825
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n34",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n34",
+   "type": "scene",
+   "title": "口袋里的话",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "你口袋里一直有东西在响",
+     "voice": "assets/voice/silent_2.444.wav",
+     "dur": 2.444
+    },
+    {
+     "who": "heroine",
+     "text": "不是表",
+     "voice": "assets/voice/silent_0.667.wav",
+     "dur": 0.667
+    }
+   ],
+   "pos": {
+    "x": 2300,
+    "y": 1825
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n35",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n35",
+   "type": "choice",
+   "title": "那张票",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "紧张"
+    }
+   ],
+   "lines": [
+    {
+     "who": "",
+     "text": "口袋里是一张两天前的车票，去她那座城的",
+     "voice": "assets/voice/silent_4.222.wav",
+     "dur": 4.222
+    },
+    {
+     "who": "",
+     "text": "作废了，我一直没扔",
+     "voice": "assets/voice/silent_2.000.wav",
+     "dur": 2.0
+    }
+   ],
+   "pos": {
+    "x": 2640,
+    "y": 1825
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "把票拿出来给她",
+     "to": "n36",
+     "condition": null
+    },
+    {
+     "label": "手按在口袋上没动",
+     "to": "n38",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n36",
+   "type": "scene",
+   "title": "作废的票",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "动摇"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "前天的……已经过期了",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    },
+    {
+     "who": "heroine",
+     "text": "你买了又不走",
+     "voice": "assets/voice/silent_1.333.wav",
+     "dur": 1.333
+    },
+    {
+     "who": "heroine",
+     "text": "你这个人真是",
+     "voice": "assets/voice/silent_1.333.wav",
+     "dur": 1.333
+    }
+   ],
+   "pos": {
+    "x": 2980,
+    "y": 1720
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n37",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n37",
+   "type": "scene",
+   "title": "买到第三天",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "低头"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "动摇"
+    }
+   ],
+   "lines": [
+    {
+     "who": "hero",
+     "text": "买到第三天我就回来了",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    },
+    {
+     "who": "hero",
+     "text": "站在那城里的车站，一句话都编不出来",
+     "voice": "assets/voice/silent_3.778.wav",
+     "dur": 3.778
+    },
+    {
+     "who": "hero",
+     "text": "就买了返程",
+     "voice": "assets/voice/silent_1.111.wav",
+     "dur": 1.111
+    }
+   ],
+   "pos": {
+    "x": 3320,
+    "y": 1720
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n40",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n38",
+   "type": "scene",
+   "title": "按着",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "算了，别拿出来",
+     "voice": "assets/voice/silent_1.556.wav",
+     "dur": 1.556
+    },
+    {
+     "who": "heroine",
+     "text": "我不想知道里面是什么",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    }
+   ],
+   "pos": {
+    "x": 2980,
+    "y": 1930
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n39",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n39",
+   "type": "scene",
+   "title": "那就没东西",
+   "status": "done",
+   "end_kind": null,
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    },
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "right",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "hero",
+     "text": "我把手从口袋里抽出来，空的",
+     "voice": "assets/voice/silent_2.889.wav",
+     "dur": 2.889
+    },
+    {
+     "who": "hero",
+     "text": "嗯，没东西",
+     "voice": "assets/voice/silent_1.111.wav",
+     "dur": 1.111
+    }
+   ],
+   "pos": {
+    "x": 3320,
+    "y": 1930
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:23.515133+00:00",
+    "cost": 0.0
+   },
+   "choices": [
+    {
+     "label": "继续",
+     "to": "n40",
+     "condition": null
+    }
+   ]
+  },
+  {
+   "id": "n40",
+   "type": "ending",
+   "title": "末班车",
+   "status": "done",
+   "end_kind": "true",
+   "bg": {
+    "asset": "assets/bg/mock.png",
+    "prompt": "天台边缘，深夜，雨刚停，城市远处车灯流动，湿润栏杆反光，冷蓝色调",
+    "seed": 0,
+    "provider": "mock"
+   },
+   "chars": [
+    {
+     "id": "heroine",
+     "pose": "assets/ref/mock.png",
+     "pos": "center",
+     "mood": "勉强笑"
+    },
+    {
+     "id": "hero",
+     "pose": "assets/char/ae6c79d10f1fd4106507.png",
+     "pos": "left",
+     "mood": "平静"
+    }
+   ],
+   "lines": [
+    {
+     "who": "heroine",
+     "text": "车没在楼下停，是拐进了巷子的另一头",
+     "voice": "assets/voice/silent_3.778.wav",
+     "dur": 3.778
+    },
+    {
+     "who": "heroine",
+     "text": "她把背包拎起来，走到楼梯口又停住",
+     "voice": "assets/voice/silent_3.556.wav",
+     "dur": 3.556
+    },
+    {
+     "who": "heroine",
+     "text": "「你送我到车站吧」",
+     "voice": "assets/voice/silent_2.000.wav",
+     "dur": 2.0
+    },
+    {
+     "who": "heroine",
+     "text": "她没回头，我也没答，只跟了上去",
+     "voice": "assets/voice/silent_3.333.wav",
+     "dur": 3.333
+    },
+    {
+     "who": "heroine",
+     "text": "雨停了，末班车还没来",
+     "voice": "assets/voice/silent_2.222.wav",
+     "dur": 2.222
+    }
+   ],
+   "pos": {
+    "x": 3660,
+    "y": 1825
+   },
+   "gen": {
+    "model": "deepseek-chat",
+    "at": "2026-11-07T05:00:35.315006+00:00",
+    "cost": 0.0
+   }
+  }
+ ],
+ "edges": [
+  {
+   "id": "e_n1_0",
+   "from": "n1",
+   "port": 0,
+   "to": "n2"
+  },
+  {
+   "id": "e_n2_0",
+   "from": "n2",
+   "port": 0,
+   "to": "n3"
+  },
+  {
+   "id": "e_n3_0",
+   "from": "n3",
+   "port": 0,
+   "to": "n4"
+  },
+  {
+   "id": "e_n4_0",
+   "from": "n4",
+   "port": 0,
+   "to": "n5"
+  },
+  {
+   "id": "e_n5_0",
+   "from": "n5",
+   "port": 0,
+   "to": "n6"
+  },
+  {
+   "id": "e_n5_1",
+   "from": "n5",
+   "port": 1,
+   "to": "n9"
+  },
+  {
+   "id": "e_n6_0",
+   "from": "n6",
+   "port": 0,
+   "to": "n7"
+  },
+  {
+   "id": "e_n7_0",
+   "from": "n7",
+   "port": 0,
+   "to": "n8"
+  },
+  {
+   "id": "e_n8_0",
+   "from": "n8",
+   "port": 0,
+   "to": "n12"
+  },
+  {
+   "id": "e_n9_0",
+   "from": "n9",
+   "port": 0,
+   "to": "n10"
+  },
+  {
+   "id": "e_n10_0",
+   "from": "n10",
+   "port": 0,
+   "to": "n11"
+  },
+  {
+   "id": "e_n11_0",
+   "from": "n11",
+   "port": 0,
+   "to": "n12"
+  },
+  {
+   "id": "e_n12_0",
+   "from": "n12",
+   "port": 0,
+   "to": "n13"
+  },
+  {
+   "id": "e_n12_1",
+   "from": "n12",
+   "port": 1,
+   "to": "n14"
+  },
+  {
+   "id": "e_n13_0",
+   "from": "n13",
+   "port": 0,
+   "to": "n14"
+  },
+  {
+   "id": "e_n14_0",
+   "from": "n14",
+   "port": 0,
+   "to": "n15"
+  },
+  {
+   "id": "e_n15_0",
+   "from": "n15",
+   "port": 0,
+   "to": "n16"
+  },
+  {
+   "id": "e_n16_0",
+   "from": "n16",
+   "port": 0,
+   "to": "n17"
+  },
+  {
+   "id": "e_n17_0",
+   "from": "n17",
+   "port": 0,
+   "to": "n18"
+  },
+  {
+   "id": "e_n18_0",
+   "from": "n18",
+   "port": 0,
+   "to": "n19"
+  },
+  {
+   "id": "e_n18_1",
+   "from": "n18",
+   "port": 1,
+   "to": "n21"
+  },
+  {
+   "id": "e_n19_0",
+   "from": "n19",
+   "port": 0,
+   "to": "n20"
+  },
+  {
+   "id": "e_n20_0",
+   "from": "n20",
+   "port": 0,
+   "to": "n23"
+  },
+  {
+   "id": "e_n21_0",
+   "from": "n21",
+   "port": 0,
+   "to": "n22"
+  },
+  {
+   "id": "e_n22_0",
+   "from": "n22",
+   "port": 0,
+   "to": "n23"
+  },
+  {
+   "id": "e_n23_0",
+   "from": "n23",
+   "port": 0,
+   "to": "n24"
+  },
+  {
+   "id": "e_n24_0",
+   "from": "n24",
+   "port": 0,
+   "to": "n25"
+  },
+  {
+   "id": "e_n25_0",
+   "from": "n25",
+   "port": 0,
+   "to": "n26"
+  },
+  {
+   "id": "e_n26_0",
+   "from": "n26",
+   "port": 0,
+   "to": "n27"
+  },
+  {
+   "id": "e_n27_0",
+   "from": "n27",
+   "port": 0,
+   "to": "n28"
+  },
+  {
+   "id": "e_n28_0",
+   "from": "n28",
+   "port": 0,
+   "to": "n29"
+  },
+  {
+   "id": "e_n29_0",
+   "from": "n29",
+   "port": 0,
+   "to": "n30"
+  },
+  {
+   "id": "e_n30_0",
+   "from": "n30",
+   "port": 0,
+   "to": "n31"
+  },
+  {
+   "id": "e_n31_0",
+   "from": "n31",
+   "port": 0,
+   "to": "n32"
+  },
+  {
+   "id": "e_n32_0",
+   "from": "n32",
+   "port": 0,
+   "to": "n33"
+  },
+  {
+   "id": "e_n33_0",
+   "from": "n33",
+   "port": 0,
+   "to": "n34"
+  },
+  {
+   "id": "e_n34_0",
+   "from": "n34",
+   "port": 0,
+   "to": "n35"
+  },
+  {
+   "id": "e_n35_0",
+   "from": "n35",
+   "port": 0,
+   "to": "n36"
+  },
+  {
+   "id": "e_n35_1",
+   "from": "n35",
+   "port": 1,
+   "to": "n38"
+  },
+  {
+   "id": "e_n36_0",
+   "from": "n36",
+   "port": 0,
+   "to": "n37"
+  },
+  {
+   "id": "e_n37_0",
+   "from": "n37",
+   "port": 0,
+   "to": "n40"
+  },
+  {
+   "id": "e_n38_0",
+   "from": "n38",
+   "port": 0,
+   "to": "n39"
+  },
+  {
+   "id": "e_n39_0",
+   "from": "n39",
+   "port": 0,
+   "to": "n40"
+  }
+ ]
+}

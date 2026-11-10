@@ -1,0 +1,116 @@
+{
+  "id": "designed-7570b9b3bc",
+  "name": "水墨古风克制",
+  "vibe": "取自参考图的 4 色，标题要大、字距拉开、竖排",
+  "keywords": [
+    "标题要大",
+    "字距拉开",
+    "竖排",
+    "水墨",
+    "古风",
+    "克制",
+    "夜",
+    "立绘"
+  ],
+  "fit": [
+    "按用户要求定制",
+    "水墨古风克制",
+    "水墨古风克制"
+  ],
+  "palette": {
+    "bg": "#161c28",
+    "fg": "#f3f3f4",
+    "accent": "#835349",
+    "muted": "#96999e",
+    "panel": "#2c323c"
+  },
+  "typeface": {
+    "title": "brush",
+    "body": "sans",
+    "mono": "mono"
+  },
+  "layout": {
+    "menu": "vertical",
+    "title_align": "center",
+    "title_size": 90,
+    "title_weight": 700,
+    "letter_spacing": "0.18em",
+    "skew": "-4deg",
+    "show_characters": false,
+    "character_opacity": 0.66,
+    "seal": true
+  },
+  "surfaces": {
+    "dialog": {
+      "bg": "rgba(22,28,40,.94)",
+      "fg": "#f3f3f4",
+      "border": "1px solid rgba(243,243,244,.30)",
+      "radius": "2px",
+      "height": "30%"
+    },
+    "choice": {
+      "bg": "rgba(44,50,60,.96)",
+      "fg": "#f3f3f4",
+      "hover": "rgba(131,83,73,.14)",
+      "border": "1px solid rgba(243,243,244,.30)",
+      "radius": "2px"
+    },
+    "save": {
+      "bg": "#161c28",
+      "fg": "#f3f3f4",
+      "accent": "#835349"
+    },
+    "settings": {
+      "bg": "#161c28",
+      "fg": "#f3f3f4",
+      "accent": "#835349"
+    },
+    "hud": {
+      "bg": "rgba(44,50,60,.96)",
+      "fg": "#f3f3f4",
+      "height": "88px"
+    }
+  },
+  "base": "ink-classic",
+  "design": {
+    "requirement": "江南雨夜，水墨古风，安静克制；标题要大，字距拉开，不要立绘，菜单竖排",
+    "title": "奇迹工坊",
+    "colors": [
+      "#e4dece",
+      "#161c28",
+      "#6c3428",
+      "#956e60"
+    ],
+    "matched": [
+      {
+        "id": "designed-8df7835304",
+        "score": 1.0
+      },
+      {
+        "id": "designed-c572315863",
+        "score": 0.897
+      },
+      {
+        "id": "ink-classic",
+        "score": 0.517
+      }
+    ],
+    "base": "ink-classic",
+    "contrast": {
+      "contrast": 15.44,
+      "accent_contrast": 2.68,
+      "source": "reference",
+      "dark": true
+    },
+    "references_used": 1,
+    "typo": [
+      "大标题",
+      "字距拉开",
+      "不要立绘"
+    ],
+    "unsupported": [
+      "菜单竖排"
+    ]
+  },
+  "notes": "骨架沿用 ink-classic（水墨直系），改成 水墨古风克制 后六块界面仍同一套视觉语言。 参考图只用于取色和判断气质，原图不进成品。 正文对比度 15.44:1（WCAG AA 要求 ≥ 4.5）。 按你的要求改了：大标题、字距拉开、不要立绘。 没做的部分：菜单竖排 —— 菜单排列写死在四套骨架的 CSS 里，这轮没动骨架，所以没换。"
+}

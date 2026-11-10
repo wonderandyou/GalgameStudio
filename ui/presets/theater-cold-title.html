@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>奇迹工坊 · 冷色剧场 · title</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#060910}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
+.stage{position:relative;width:100vw;height:100vh;overflow:hidden;user-select:none}
+.ver{position:absolute;font-size:12px;letter-spacing:.14em;opacity:.55;font-family:Consolas,monospace}
+.corner{position:absolute;display:flex;gap:16px;align-items:center}
+.corner button{background:none;border:0;cursor:pointer;font-size:19px;line-height:1;
+  opacity:.62;transition:opacity .18s,transform .18s;padding:4px}
+.corner button:hover{opacity:1;transform:scale(1.12)}
+
+.v4{background:#060910}
+.v4 .bg{position:absolute;inset:0;background-size:cover;background-position:center;
+  filter:brightness(.34) saturate(.55) hue-rotate(-8deg)}
+.v4 .glow{position:absolute;inset:0;
+  background:radial-gradient(50% 42% at 50% 46%,rgba(96,158,255,.16),transparent 70%),
+    radial-gradient(120% 100% at 50% 120%,rgba(4,6,12,.96),transparent 62%)}
+.v4 .frame{position:absolute;inset:5.4% 6%;pointer-events:none}
+.v4 .frame i{position:absolute;background:rgba(150,185,235,.20)}
+.v4 .frame i.t{left:0;right:0;top:0;height:1px}
+.v4 .frame i.b{left:0;right:0;bottom:0;height:1px}
+.v4 .frame i.l{top:0;bottom:0;left:0;width:1px}
+.v4 .frame i.r{top:0;bottom:0;right:0;width:1px}
+.v4 .logo{position:absolute;left:50%;top:24%;transform:translateX(-50%);text-align:center}
+.v4 .cn{display:block;font-family:"Microsoft YaHei","PingFang SC",sans-serif;font-weight:300;
+  font-size:62px;color:#eaf2ff;letter-spacing:0.44em;
+  text-indent:0.44em;text-shadow:0 0 46px rgba(120,175,255,.42)}
+.v4 .en{display:block;margin-top:20px;font-family:Consolas,monospace;font-size:11px;
+  letter-spacing:.72em;text-indent:.72em;color:rgba(175,200,240,.48)}
+.v4 .menu{position:absolute;left:50%;top:56%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:19px}
+.v4 .menu a{text-decoration:none;color:rgba(175,200,240,.48);font-family:"Microsoft YaHei","PingFang SC",sans-serif;font-size:16px;
+  letter-spacing:.42em;text-indent:.42em;padding:4px 0;
+  transition:color .24s,text-shadow .24s,letter-spacing .24s}
+.v4 .menu a:hover{color:#fff;letter-spacing:.52em;text-indent:.52em;
+  text-shadow:0 0 22px rgba(140,190,255,.85)}
+
+</style></head><body><div class="stage"><div class="v4"><div class="bg" style="background-image:url('../assets/title/bg_city.png')"></div><div class="glow"></div><div class="frame"><i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i></div><div class="logo"><span class="cn">奇迹工坊</span><span class="en">WHALE FALL WORKSHOP</span></div><div class="menu"><a href="#">开始</a><a href="#">继续</a><a href="#">读取</a><a href="#">设置</a></div><div class="ver" style="left:50%;bottom:8%;transform:translateX(-50%);color:rgba(175,200,240,.40)">v0.1.0 build 2026.11</div><div class="corner" style="right:4.4%;bottom:4.2%"><button style="color:rgba(200,220,250,.6)" title="设置">⚙</button><button style="color:rgba(200,220,250,.6)" title="退出">✕</button></div></div></div></body></html>

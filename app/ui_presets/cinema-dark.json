@@ -1,0 +1,41 @@
+{
+  "id": "cinema-dark",
+  "name": "暗色电影感",
+  "vibe": "全幅剧照压暗，左下大字标题，底部横排菜单",
+  "keywords": [
+    "电影感", "大片", "雨夜", "港口", "都市", "硬派", "黑色",
+    "写实", "深夜", "群像", "商业", "大气", "枪战", "城市", "厚重", "赛博"
+  ],
+  "fit": ["都市", "犯罪", "群像", "大制作"],
+  "palette": {
+    "bg": "#080a0d",
+    "fg": "#f6f1e6",
+    "accent": "#c9974f",
+    "muted": "rgba(246,241,230,.55)",
+    "panel": "rgba(8,10,13,.72)"
+  },
+  "typeface": {
+    "title": "sans",
+    "body": "sans",
+    "mono": "mono"
+  },
+  "layout": {
+    "menu": "horizontal",
+    "title_align": "left",
+    "title_size": 82,
+    "title_weight": 800,
+    "letter_spacing": "0.06em",
+    "skew": "0deg",
+    "show_characters": false,
+    "character_opacity": 0,
+    "seal": false
+  },
+  "surfaces": {
+    "dialog": {"bg": "rgba(8,10,13,.88)", "fg": "#f6f1e6", "border": "1px solid rgba(201,151,79,.28)", "radius": "4px", "height": "30%"},
+    "choice": {"bg": "rgba(14,17,22,.92)", "fg": "rgba(246,241,230,.86)", "hover": "rgba(201,151,79,.14)", "border": "1px solid rgba(201,151,79,.30)", "radius": "3px"},
+    "save": {"bg": "#0c0f14", "fg": "#f6f1e6", "accent": "#c9974f"},
+    "settings": {"bg": "#0c0f14", "fg": "#f6f1e6", "accent": "#c9974f"},
+    "hud": {"bg": "rgba(8,10,13,.55)", "fg": "rgba(246,241,230,.80)", "height": "96px"}
+  },
+  "notes": "背景必须压到 brightness .74 以下，否则白字读不清；标题下方的英文副标题和金色细线成套出现。"
+}

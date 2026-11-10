@@ -1,0 +1,41 @@
+{
+  "id": "theater-cold",
+  "name": "冷色剧场",
+  "vibe": "深蓝黑底，居中细体大字距，细线框，冷静肃穆",
+  "keywords": [
+    "冷色调", "悲剧", "压抑", "孤独", "科幻", "末日",
+    "沉浸", "深蓝", "记忆", "末路", "肃杀", "沉默", "实验", "反乌托邦", "沉重", "心理"
+  ],
+  "fit": ["科幻", "悲剧", "悬疑", "心理"],
+  "palette": {
+    "bg": "#060910",
+    "fg": "#eaf2ff",
+    "accent": "#609eff",
+    "muted": "rgba(175,200,240,.48)",
+    "panel": "rgba(6,9,16,.78)"
+  },
+  "typeface": {
+    "title": "sans",
+    "body": "sans",
+    "mono": "mono"
+  },
+  "layout": {
+    "menu": "vertical",
+    "title_align": "center",
+    "title_size": 62,
+    "title_weight": 300,
+    "letter_spacing": "0.44em",
+    "skew": "0deg",
+    "show_characters": false,
+    "character_opacity": 0,
+    "seal": false
+  },
+  "surfaces": {
+    "dialog": {"bg": "rgba(6,9,16,.86)", "fg": "#eaf2ff", "border": "1px solid rgba(150,185,235,.22)", "radius": "2px", "height": "30%"},
+    "choice": {"bg": "rgba(10,14,24,.90)", "fg": "rgba(220,233,252,.78)", "hover": "rgba(96,158,255,.16)", "border": "1px solid rgba(150,185,235,.24)", "radius": "2px"},
+    "save": {"bg": "#080b12", "fg": "#eaf2ff", "accent": "#609eff"},
+    "settings": {"bg": "#080b12", "fg": "#eaf2ff", "accent": "#609eff"},
+    "hud": {"bg": "rgba(6,9,16,.50)", "fg": "rgba(200,220,250,.70)", "height": "92px"}
+  },
+  "notes": "背景要压到 brightness .34；内框留白 5.4% 6%；菜单 hover 时字距再拉大 0.10em 才有效果。"
+}
