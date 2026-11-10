@@ -79,3 +79,38 @@ docs/测试清单-给agent.md
 docs/交接-*.md
 docs/提示词-*.md
 
+
+# ===== 内部文档：任何情况下都不公开到 GitHub =====
+# 提示词（给 AI 的指令稿，含内部决策过程与真实数据）
+提示词-*.md
+docs/提示词-*.md
+_qa/提示词_*.md
+
+# ===== 只发布「源码」+ Release 里的打包软件，其余一律不进版本库 =====
+docs/
+out/
+build/
+verification/
+_incoming_m2/
+_backup_*/
+app/_whl/
+tools/shots/
+tools/_grok_patch/
+unity/Assets/StreamingAssets/
+HANDOFF.md
+backend.log
+ui_server.log
+launcher-exe.log
+方案.md
+环境说明.md
+给GPT的下一批任务.md
+
+# ===== 运行期状态 / 日志 / 缓存：不进版本库 =====
+.jobs/
+_logs/
+.state/
+pip-unpack-*/
+gal_gen_*/
+tools/_*.js
+tools/_*.ps1
+tools/agent_real_path.json

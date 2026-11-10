@@ -24,8 +24,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PUBLISH = Path('D:/软件/_gal-publish')     # 发布用的干净仓库（在项目目录外）
 REMOTE = 'https://github.com/wonderandyou/GalgameStudio.git'
-SYNC_DIRS = ['app', 'ui', 'launcher', 'tools', 'tests', 'docs', 'scripts', 'unity',
-             'requirements.txt', 'README.md', 'HANDOFF.md']
+# 只同步「源码」。docs/、HANDOFF.md、提示词、日志、产物一律不进仓库
+# （.gitignore 里有对应规则兜底，这里是双保险 + 明确意图）
+SYNC_DIRS = ['app', 'ui', 'launcher', 'tools', 'tests', 'scripts', 'unity',
+             'requirements.txt', 'README.md']
 GITATTR = (
     '* text=auto eol=lf\n'
     '*.png binary\n*.jpg binary\n*.jpeg binary\n'

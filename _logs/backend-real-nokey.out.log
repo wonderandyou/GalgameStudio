@@ -1,5 +1,0 @@
-INFO:     127.0.0.1:54396 - "GET /api/health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64486 - "POST /api/projects HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64486 - "POST /api/projects/p_98e66099c1874bfe902ee193980ccefc/generate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64486 - "GET /api/jobs/j_d99592c52aed4eda8c30c906e8d929bf/events HTTP/1.1" 200 OK
-INFO:     127.0.0.1:64489 - "GET /api/projects/p_98e66099c1874bfe902ee193980ccefc/graph HTTP/1.1" 200 OK
