@@ -73,3 +73,16 @@ _qa/
 tmp*/
 # 按骨架修复写盘前的 graph.json 备份（tools/repair_from_skeleton.py / POST repair-from-skeleton）
 _backup_projects/
+
+# ---- 发布到 GitHub 时排除的本地产物 ----
+_backup_m1/
+_backup_ui_*/
+_incoming_m2/
+_logs/
+out/
+verification/
+pip-unpack-*/
+backend.log
+ui_server.log
+launcher-exe.log
+.gal-push/
