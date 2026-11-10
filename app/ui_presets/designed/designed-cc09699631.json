@@ -1,0 +1,94 @@
+{
+  "id": "designed-cc09699631",
+  "name": "水墨克制夜",
+  "vibe": "克制、夜、深色",
+  "keywords": [
+    "克制",
+    "夜",
+    "深色"
+  ],
+  "fit": [
+    "按用户要求定制",
+    "暗色电影感",
+    "水墨古风克制"
+  ],
+  "palette": {
+    "bg": "#14161a",
+    "fg": "#e8e4dc",
+    "accent": "#b8443a",
+    "muted": "#8a857c",
+    "panel": "#1d2026"
+  },
+  "typeface": {
+    "title": "serif",
+    "body": "sans",
+    "mono": "mono"
+  },
+  "layout": {
+    "menu": "vertical",
+    "title_align": "center",
+    "title_size": 74,
+    "title_weight": 700,
+    "letter_spacing": "0.10em",
+    "skew": "-4deg",
+    "show_characters": true,
+    "character_opacity": 0.66,
+    "seal": true
+  },
+  "surfaces": {
+    "dialog": {
+      "bg": "rgba(20,22,26,.94)",
+      "fg": "#e8e4dc",
+      "border": "1px solid rgba(232,228,220,.30)",
+      "radius": "2px",
+      "height": "30%"
+    },
+    "choice": {
+      "bg": "rgba(29,32,38,.96)",
+      "fg": "#e8e4dc",
+      "hover": "rgba(184,68,58,.14)",
+      "border": "1px solid rgba(232,228,220,.30)",
+      "radius": "2px"
+    },
+    "save": {
+      "bg": "#14161a",
+      "fg": "#e8e4dc",
+      "accent": "#b8443a"
+    },
+    "settings": {
+      "bg": "#14161a",
+      "fg": "#e8e4dc",
+      "accent": "#b8443a"
+    },
+    "hud": {
+      "bg": "rgba(29,32,38,.96)",
+      "fg": "#e8e4dc",
+      "height": "88px"
+    }
+  },
+  "base": "ink-classic",
+  "design": {
+    "requirement": "深色深夜天台，雨夜霓虹，克制的青蓝色点缀",
+    "title": "奇迹工坊",
+    "colors": [],
+    "matched": [
+      {
+        "id": "cinema-dark",
+        "score": 1.0
+      },
+      {
+        "id": "designed-7570b9b3bc",
+        "score": 0.857
+      }
+    ],
+    "base": "ink-classic",
+    "contrast": {
+      "contrast": null,
+      "source": "preset"
+    },
+    "references_used": 0,
+    "typo": [],
+    "unsupported": []
+  },
+  "notes": "骨架沿用 ink-classic（水墨直系），改成 水墨克制夜 后六块界面仍同一套视觉语言。 参考图只用于取色和判断气质，原图不进成品。"
+}

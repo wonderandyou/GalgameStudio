@@ -3731,8 +3731,16 @@
     grid.className = 'ui-design-screens';
     screens.forEach(function (raw) {
       const item = raw || {};
-      const url = item.url || item.src || '';
-      const file = item.path || url;
+      // ★ 后端返回的 url 是「相对路径」/api/assets/<pid>/assets/...，
+      //   但本页跑在 8799（界面服务），直接拿来当 src 会请求到 8799 自己 → 404。
+      //   实测：8799/api/assets/... → 404 File not found；8790 同路径 → 200 3895 字节。
+      //   必须补上 GalAPI.base（真后端 8790 / 打包时同端口）。
+      const relUrl = item.url || item.src || '';
+      const absUrl = relUrl
+        ? (relUrl.indexOf('http') === 0 ? relUrl : (GalAPI.base || '') + relUrl)
+        : '';
+      // 后端另给了本地绝对路径（item.path）时才走「打开文件夹」，否则用浏览器打开 http 地址
+      const localPath = item.path || '';
       const label = item.label || item.name || item.screen || item.id || '界面';
       const card = document.createElement('div');
       card.className = 'ui-design-screen';
@@ -3741,18 +3749,23 @@
       const tag = document.createElement('b');
       tag.textContent = label;
       bar.appendChild(tag);
-      if (file) {
+      if (localPath || absUrl) {
         const open = document.createElement('button');
         open.type = 'button';
         open.className = 'btn sm ghost';
         open.textContent = '打开 HTML';
-        open.addEventListener('click', function () { openLocalPath(file); });
+        open.addEventListener('click', function () {
+          if (localPath) { openLocalPath(localPath); return; }
+          // 相对路径当本地文件夹打开是错的，这里必须是完整 http 地址
+          try { window.open(absUrl, '_blank', 'noopener'); }
+          catch (err) { toast('打开失败：' + absUrl); }
+        });
         bar.appendChild(open);
       }
       card.appendChild(bar);
-      if (url) {
+      if (absUrl) {
         const frame = document.createElement('iframe');
-        frame.src = url;
+        frame.src = absUrl;
         frame.setAttribute('sandbox', 'allow-same-origin');
         frame.setAttribute('loading', 'lazy');
         frame.style.height = '300px';
