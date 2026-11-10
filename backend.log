@@ -1,0 +1,204 @@
+INFO:     Started server process [4808]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8791 (Press CTRL+C to quit)
+INFO:     127.0.0.1:54309 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50012 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     Started server process [21028]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8791 (Press CTRL+C to quit)INFO:     127.0.0.1:58314 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58316 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58316 - "DELETE /api/projects/p_6723ccb36b264d6086fed18642561a4e HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58316 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58316 - "DELETE /api/projects/p_00000000000000000000000000000000 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49926 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63707 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55682 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58275 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55862 - "GET /api/projects/p_8d7654322052472aae5f614a287c3955/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55862 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62699 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59297 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58921 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53773 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64014 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63772 - "OPTIONS /api/projects/p_8d7654322052472aae5f614a287c3955 HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:64225 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50279 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61430 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55761 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53609 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55778 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64533 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60535 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64058 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53196 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52768 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51088 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51562 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53912 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57342 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59175 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64827 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60221 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61090 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55331 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53348 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50290 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60057 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62682 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50729 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59905 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57563 - "OPTIONS /api/projects/p_8d7654322052472aae5f614a287c3955 HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:57568 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59303 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53991 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59192 - "OPTIONS /api/projects/p_8d7654322052472aae5f614a287c3955 HTTP/1.1" 400 Bad Request
+INFO:     Started server process [12552]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8791 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49777 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50442 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51706 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60033 - "OPTIONS /api/projects/p_8d7654322052472aae5f614a287c3955 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60033 - "DELETE /api/projects/p_8d7654322052472aae5f614a287c3955 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60033 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54234 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58500 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57107 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59583 - "OPTIONS /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59583 - "POST /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63555 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63555 - "GET /api/projects/p_65a75457437340b5a2859fa9582bdc4d/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63555 - "GET /api/projects/p_157e0aa789344f2889151f0c0999791d/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63555 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54004 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57022 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57023 - "DELETE /api/projects/p_65a75457437340b5a2859fa9582bdc4d HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57024 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49246 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51789 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52739 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61747 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59468 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57272 - "OPTIONS /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57272 - "POST /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57272 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57272 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57272 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57272 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57272 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57272 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60457 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60457 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60457 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60457 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60457 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61772 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51662 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59226 - "OPTIONS /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59226 - "POST /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55617 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55617 - "GET /api/projects/p_a08e751af2d54a2aa0785781048e18a2/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55617 - "GET /api/projects/p_a08e751af2d54a2aa0785781048e18a2/graph HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\软件\GalgameStudio\app\.venv\Lib\site-packages\uvicorn\__main__.py", line 4, in <module>
+    uvicorn.main()
+  File "D:\软件\GalgameStudio\app\.venv\Lib\site-packages\click\core.py", line 1631, in __call__
+    return self.main(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\软件\GalgameStudio\app\.venv\Lib\site-packages\click\core.py", line 1552, in main
+    rv = self.invoke(ctx)
+         ^^^^^^^^^^^^^^^^
+  File "D:\软件\GalgameStudio\app\.venv\Lib\site-packages\click\core.py", line 1415, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\软件\GalgameStudio\app\.venv\Lib\site-packages\click\core.py", line 910, in invoke
+    return callback(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\软件\GalgameStudio\app\.venv\Lib\site-packages\uvicorn\main.py", line 448, in main
+    run(
+  File "D:\软件\GalgameStudio\app\.venv\Lib\site-packages\uvicorn\main.py", line 620, in run
+    config.load_app()
+  File "D:\软件\GalgameStudio\app\.venv\Lib\site-packages\uvicorn\config.py", line 434, in load_app
+    return import_from_string(self.app)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\软件\GalgameStudio\app\.venv\Lib\site-packages\uvicorn\importer.py", line 19, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\q3153\AppData\Local\Programs\Python\Python311\Lib\importlib\__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "D:\软件\GalgameStudio\app\main.py", line 85, in <module>
+    from .mock_api import router, lifespan
+  File "D:\软件\GalgameStudio\app\mock_api.py", line 23, in <module>
+    from .engine.pipeline import Pipeline
+  File "D:\软件\GalgameStudio\app\engine\pipeline.py", line 22, in <module>
+    from ..mock_data import draft, png, silent_wav
+ImportError: cannot import name 'draft' from 'app.mock_data' (D:\软件\GalgameStudio\app\mock_data.py)
+INFO:     Started server process [20668]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8791 (Press CTRL+C to quit)INFO:     127.0.0.1:61004 - "POST /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61004 - "GET /api/projects/p_e1d2bc96e3f346c28de51cc02c5a2f26/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64878 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56768 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53338 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54305 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61369 - "GET /api/projects/p_e1d2bc96e3f346c28de51cc02c5a2f26/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61369 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57733 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53240 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50795 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56431 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56431 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58315 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54836 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59561 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59561 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59284 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55676 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61141 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52810 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52811 - "DELETE /api/projects/p_e1d2bc96e3f346c28de51cc02c5a2f26 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52812 - "DELETE /api/projects/p_a08e751af2d54a2aa0785781048e18a2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52813 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54734 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54734 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54734 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54734 - "GET /api/projects/p_51ab59f53dc74e7ca392978332d13a14/graph HTTP/1.1" 200 OK
+INFO:     Started server process [13116]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8791 (Press CTRL+C to quit)
+INFO:     127.0.0.1:65000 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65000 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59746 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55322 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52528 - "OPTIONS /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52528 - "POST /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52528 - "GET /api/projects/p_d31da6b16ece42e087e5ed96a5b86464/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52528 - "OPTIONS /api/projects/p_d31da6b16ece42e087e5ed96a5b86464/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52528 - "PUT /api/projects/p_d31da6b16ece42e087e5ed96a5b86464/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54519 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51383 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63413 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56158 - "OPTIONS /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56158 - "POST /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56158 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56158 - "GET /api/projects/p_3d911f32a42e4c6ea998dd4c872ea539/graph HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56158 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64719 - "GET /api/projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64720 - "DELETE /api/projects/p_3d911f32a42e4c6ea998dd4c872ea539 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64721 - "DELETE /api/projects/p_d31da6b16ece42e087e5ed96a5b86464 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64722 - "GET /api/projects HTTP/1.1" 200 OK
