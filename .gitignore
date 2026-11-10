@@ -73,3 +73,9 @@ _qa/
 tmp*/
 # 按骨架修复写盘前的 graph.json 备份（tools/repair_from_skeleton.py / POST repair-from-skeleton）
 _backup_projects/
+
+# 内部工具文档：只在本机用，不公开到 GitHub
+docs/测试清单-给agent.md
+docs/交接-*.md
+docs/提示词-*.md
+
