@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 app/.venv/
 __pycache__/
 *.pyc
@@ -114,3 +114,17 @@ gal_gen_*/
 tools/_*.js
 tools/_*.ps1
 tools/agent_real_path.json
+
+# 界面设计生成出来的预设（运行时产物，每设计一次多一个，不进版本库）
+app/ui_presets/designed/
+
+# ===== 测试 / 调试残留：QA 脚本会在仓库根随手建这些（2026-11-11 清过一次）=====
+# 不拦住的话根目录会越积越多（实测攒到 10 个 ui-* 空目录）
+ui-char-*/
+ui-play-*/
+gal_p1_*/
+gal_bundle_*/
+gal_reap_*/
+launcher_prev*.log
+launcher.log
+_release_*.zip
