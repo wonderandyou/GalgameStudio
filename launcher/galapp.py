@@ -313,20 +313,51 @@ def acquire_single_instance():
         return True
 
 
+def release_single_instance():
+    """放掉本进程持有的单实例锁。
+
+    ★★ 为什么必须放（2026-11-11，第三轮验证 P2-B）：
+      窗口关闭后进程要常驻保住后端（说明书 S5 的承诺），可 mutex 一直被它握着。
+      用户再双击时，新进程 CreateMutexW 拿到 ERROR_ALREADY_EXISTS → 判定「已有实例」
+      → 转去找窗口 → 窗口早就关了，找不到 → 直接退出。
+      **用户看到的就是「双击一下，什么都没发生」** —— 历次报「启动器打不开」的根因。
+
+      窗口没了就该把锁让出来：下一次双击能正常拿到锁，去复用已有的后端、开新窗口。
+      注意 mutex 只能由持有者自己释放，别的进程 CloseHandle 救不了。
+    """
+    global _SINGLE_HANDLE
+    if not _SINGLE_HANDLE:
+        return False
+    try:
+        import ctypes
+        ctypes.WinDLL('kernel32').CloseHandle(_SINGLE_HANDLE)
+        log('单实例锁已释放（窗口关了，让下次双击能开新窗口）')
+    except Exception as exc:
+        log('释放单实例锁失败：%r' % exc)
+    _SINGLE_HANDLE = None
+    return True
+
+
 def activate_existing_window():
-    """把已经开着的窗口调到最前面（被单实例锁拦下来时用）。"""
+    """把已经开着的**我们自己的**窗口调到最前面（被单实例锁拦下来时用）。
+
+    ★ 不能用 FindWindowW(None, APP_TITLE)（2026-11-11 实测）：
+      它命中的是 explorer.exe 的 `Windows.Internal.Shell.TabProxyWindow`，
+      大小 135×37 —— 一个资源管理器的代理窗口，不是我们那个 1400×900 的真窗口。
+      点它当然什么都不会发生。所以改成按句柄挨个试 `_app_window_handles()`。
+    """
     if os.name != 'nt':
         return False
     try:
         import ctypes
         from ctypes import wintypes
         user32 = ctypes.WinDLL('user32', use_last_error=True)
-        user32.FindWindowW.restype = wintypes.HWND
-        user32.FindWindowW.argtypes = [wintypes.LPCWSTR, wintypes.LPCWSTR]
-        hwnd = user32.FindWindowW(None, APP_TITLE)
-        if hwnd:
+        user32.ShowWindow.argtypes = [wintypes.HWND, ctypes.c_int]
+        user32.SetForegroundWindow.argtypes = [wintypes.HWND]
+        for hwnd in _app_window_handles():
             user32.ShowWindow(hwnd, 9)              # SW_RESTORE
             user32.SetForegroundWindow(hwnd)
+            log('已把现有窗口调到前面（hwnd=%s）' % hwnd)
             return True
     except Exception as exc:
         log('前台激活旧窗口失败：%r' % exc)
@@ -985,17 +1016,16 @@ def _visible_titles():
     return titles
 
 
-def _app_window_ready():
-    """Edge app 窗口的标志：可见 + 尺寸正常 + 在屏幕内。
+def _app_window_handles():
+    """收集「像我们那个窗口」的句柄：可见 + 标题含奇迹工坊 + 尺寸够 + 在屏幕内。
 
-    ⚠ 只看标题会误判：实测有个 158x26 的任务栏条目标题也是「奇迹工坊」，
-    而真正的窗口被摆在 (-21333, -21333) —— 屏幕外，用户看到的就是"什么都没有"。
+    返回句柄集合而不是布尔，是为了让调用方能用**差集**认出自己那一个。
     """
     import ctypes
     from ctypes import wintypes
 
     user32 = ctypes.WinDLL('user32', use_last_error=True)
-    found = []
+    found = set()
 
     @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
     def callback(hwnd, _):
@@ -1013,12 +1043,28 @@ def _app_window_ready():
         width, height = rect.right - rect.left, rect.bottom - rect.top
         # 屏幕内 + 够大才算数
         if width >= 400 and height >= 300 and rect.left > -1000 and rect.top > -1000:
-            found.append(buffer.value)
-            return False
+            found.add(int(hwnd))
         return True
 
     user32.EnumWindows(callback, 0)
-    return bool(found)
+    return found
+
+
+def _app_window_ready(exclude=None):
+    """Edge app 窗口的标志：可见 + 尺寸正常 + 在屏幕内。
+
+    ⚠ 只看标题会误判：实测有个 158x26 的任务栏条目标题也是「奇迹工坊」，
+    而真正的窗口被摆在 (-21333, -21333) —— 屏幕外，用户看到的就是"什么都没有"。
+
+    ★ `exclude` 是**启动前**就存在的窗口句柄集合。机器上同时开着别的「奇迹工坊」
+    窗口（别的 agent 测试、或者用户开了两个）时，以前 0.5 秒就判定"窗口已就绪"，
+    然后那个**别人的**窗口一关，这边就记「窗口已关闭」→ 把自己的后端也杀了。
+    用差集之后只认「本次启动后新出现」的那一个。
+    """
+    handles = _app_window_handles()
+    if exclude:
+        handles -= set(exclude)
+    return bool(handles)
 
 
 def open_in_browser(url):
@@ -1109,7 +1155,42 @@ def launch_edge_app(url):
     #   实例然后自己秒退，--app 在转交中丢掉，同样白屏。
     base = Path(os.environ.get('PUBLIC') or r'C:\Users\Public')
     profile = base / ('GalgameStudio-edge-%d' % os.getpid())
-    log('profile 目录：%s' % profile)
+    # ★★ 必须自己先把目录建出来，而且必须是 **ASCII 路径**（2026-11-11 实测：
+    #   这一条是「双击没反应」的真根因）：
+    #
+    #   以前从不建，靠 Edge 自己创建。实测这台机器上打包版进程**建不了**
+    #   `C:\Users\Public\GalgameStudio-edge-<pid>`：
+    #       [WinError 5] 拒绝访问
+    #   → Edge 拿不到 profile → msedge.exe 静默退出 → 30 秒等不到窗口
+    #   → 降级到系统默认浏览器。日志里只有「Edge 已拉起」然后就没下文了。
+    #
+    #   ⚠ 回退位置也必须是 ASCII（注释里早就记着这条，我自己第一版还踩了）：
+    #     含中文的路径下 Edge 会**忽略 --app**，开成带地址栏的普通窗口，
+    #     标题变成 `127.0.0.1_/`、页面白屏。所以不能用 %TEMP%
+    #     （这台机器 TEMP 指向 D:\软件\...，带中文）。
+    candidates = []
+    local = os.environ.get('LOCALAPPDATA')
+    if local and local.isascii():
+        candidates.append(Path(local) / 'GalgameStudio' / ('edge-%d' % os.getpid()))
+    if str(base).isascii():
+        candidates.append(base / ('GalgameStudio-edge-%d' % os.getpid()))
+    profile = None
+    for candidate in candidates:
+        try:
+            candidate.mkdir(parents=True, exist_ok=True)
+            profile = candidate
+            break
+        except OSError as exc:
+            log('profile 目录建不出来（%s）：%r' % (candidate, exc))
+    if profile is None:
+        # ★ 不要再退到 tempfile.mkdtemp()（2026-11-11 实测踩了两遍）：
+        #   这台机器的临时目录是 `D:\软件\...`，**含中文**。而中文路径下
+        #   Edge 会忽略 `--app`、开成带地址栏的普通窗口（标题 `127.0.0.1_/`、白屏），
+        #   比不传还糟。所以宁可不用独立 profile，直接让 Edge 用默认的
+        #   —— 实测 `--app` 单独用能正常开出无地址栏的应用窗口。
+        log('⚠ 独立 profile 建不出来（%LOCALAPPDATA% 和 %PUBLIC% 都被拒）'
+            ' —— 不传 --user-data-dir，用 Edge 默认 profile')
+    log('profile 目录：%s' % (profile or '(不用，走默认 profile)'))
     # ⚠ URL 必须同时满足两条，都是实测踩出来的：
     #   1. 剥掉 `?query&` —— `&` 会被 Edge 当参数分隔，--app 的值被截断成
     #      `127.0.0.1_/index.html`，结果开成白屏的**普通窗口**；
@@ -1144,9 +1225,27 @@ def launch_edge_app(url):
     #   启动器进程本身还会秒退（Chromium 把活转交给已有实例后就退出，这是正常行为）。
     #   实测（2026-11-10）：同样这条命令行，PowerShell 的 Start-Process 能开出窗口，
     #   而这里的 Popen 30 秒都等不到标题 —— 差别就是 job。
-    sh = _shell_execute(
-        str(edge),
-        '--app=%s --window-size=1400,900 --window-position=120,60 --no-first-run' % bare)
+    # ★ 启动前先给现有窗口拍一张快照：机器上可能已经开着别的「奇迹工坊」窗口
+    #   （用户开了两个、或者别的 agent 正在测），后面只认**这次新出现**的那一个。
+    before_windows = _app_window_handles()
+    # ★ 必须真的把 --user-data-dir 传给 Edge（算出来了不传，Edge 就会复用默认
+    #   profile，撞上「已有实例」把命令行转交过去、自己秒退，--app 在转交中丢掉
+    #   → 开出白屏普通窗口 / 标题不对 → 被误判「窗口没出来」）。
+    #   ★ 但目录**建不出来**时不能硬传：实测（2026-11-11）打包版进程在某些环境里
+    #     连 %LOCALAPPDATA% 都建不了子目录，硬传 → Edge 秒退 → 30 秒没窗口
+    #     → 降级到系统默认浏览器。建不出来就退回「不带这个参数」，
+    #     实测 `--app` 单独用是能正常出窗口的（代价是共用了用户自己的 Edge profile）。
+    # ★★ 参数要给到**最少**（2026-11-11 实测）：
+    #   本机唯一 100% 能开出无地址栏应用窗口的组合就是 `--app=<url>` 单独一个。
+    #   多带 --window-size / --window-position / --no-first-run 时，通过
+    #   ShellExecuteEx 拉起会失败（Edge 秒退、30 秒等不到窗口）。
+    #   窗口尺寸/位置交给 Edge 自己的记忆就行，能开出来比好看重要。
+    params = ['--app=%s' % bare]
+    if profile is not None:
+        params.insert(1, '--user-data-dir="%s"' % profile)
+    else:
+        log('⚠ 不传 --user-data-dir：如果用户自己开着 Edge，--app 可能被转交丢掉')
+    sh = _shell_execute(str(edge), ' '.join(params))
     if sh:
         log('Edge 已通过 ShellExecuteEx 拉起（hProcess=%s）' % sh)
     else:
@@ -1165,7 +1264,7 @@ def launch_edge_app(url):
     #   而这个页面要下 1.3 MB 静态资源 + 渲染整张节点画布，本来就慢。
     for _ in range(60):                 # 最多等 30 秒
         time.sleep(0.5)
-        if _app_window_ready():
+        if _app_window_ready(exclude=before_windows):
             ready = True
             break
 
@@ -1176,6 +1275,8 @@ def launch_edge_app(url):
         open_in_browser(url)
         log('★ 后端保持运行（页面要靠它）；要停就结束「奇迹工坊.exe」。'
             '再次双击本程序会复用已有后端，不会起第二份。')
+        # ★ 没有窗口了，把单实例锁让出来，否则下次双击「什么都没发生」（P2-B）
+        release_single_instance()
         while True:
             time.sleep(300)
 
@@ -1184,17 +1285,28 @@ def launch_edge_app(url):
     #   自己就退出了（Chromium 的常规行为），wait() 会立刻返回，
     #   于是程序以为「窗口关了」跟着退出，后端一死窗口就白。
     #   所以改成轮询窗口标题还在不在。
-    while _app_window_ready():
+    while _app_window_ready(exclude=before_windows):
         time.sleep(2)
     log('Edge 应用窗口已关闭')
 
     # 只有窗口真的关了，才清理本次的 profile。
     try:
         import shutil
-        shutil.rmtree(profile, ignore_errors=True)
+        if profile is not None:                 # 建不出来时是 None，别拿 None 去 rmtree
+            shutil.rmtree(profile, ignore_errors=True)
     except Exception:
         pass
-    return 0
+    # ★ 和上面降级路径保持一致：窗口关了**不能把后端带走**。
+    #   说明书 S5 承诺「关闭窗口后后端故意常驻」，可这里原来是直接 return 0，
+    #   启动器一退就把 backend 子进程一起收掉（实测日志：21:14:09 关闭子进程[backend] pid=35084）。
+    #   后果：还开着的浏览器标签全部 Failed to fetch，正在跑的生成/导出直接断。
+    #   两条开窗路径行为统一成「窗口是壳，后端独立活着」。
+    log('★ 后端保持运行（页面要靠它）；要停就结束「奇迹工坊.exe」。'
+        '再次双击本程序会复用已有后端，不会起第二份。')
+    # ★ 没有窗口了，把单实例锁让出来，否则下次双击「什么都没发生」（P2-B）
+    release_single_instance()
+    while True:
+        time.sleep(300)
 
 
 def main():
@@ -1210,9 +1322,13 @@ def main():
     # 已经有一个窗口在跑就别再开一个：两个实例会抢同一个后端，
     # 关掉其中一个时会把后端带走，另一个立刻到处 Failed to fetch（实测踩过）
     if not acquire_single_instance():
-        log('已经有一个窗口在运行，把它调到前面，本次不再重复打开')
-        activate_existing_window()
-        return 0
+        if activate_existing_window():
+            log('已经有一个窗口在运行，已调到前面，本次不再重复打开')
+            return 0
+        # ★ 锁被占，但一个我们的窗口都找不到 —— 上一个实例只剩后端在常驻、窗口早关了。
+        #   以前这里也是直接 return 0，用户看到的就是「双击一下，什么都没发生」
+        #   （第三轮验证 P2-B 的原始现象）。这里放行，照常开新窗口。
+        log('单实例锁被占，但没找到任何窗口（上一个实例只剩后端），照常开新窗口')
 
     backend_ok, _ = ensure_backend()
     ui_ok, _ = ensure_ui_server()
@@ -1390,8 +1506,17 @@ def main():
         webview.start(gui='edgechromium')
     finally:
         log('窗口已关闭')
-        stop_children()
-    return 0
+    # ★ 和 Edge 那条路径保持一致：窗口只是壳，**后端要留下**。
+    #   以前这里 finally 里直接 stop_children()，关窗就把 8790 带走 ——
+    #   还开着的浏览器标签全部 Failed to fetch，正在跑的生成/导出直接断。
+    #   本机 venv 没装 pywebview 所以一直走 Edge 路径看不出问题，
+    #   但系统 Python 3.11 装了 webview、打包版也可能带，换解释器就命中。
+    log('★ 后端保持运行（页面要靠它）；要停就结束「奇迹工坊.exe」。'
+        '再次双击本程序会复用已有后端，不会起第二份。')
+    # ★ 没有窗口了，把单实例锁让出来，否则下次双击「什么都没发生」（P2-B）
+    release_single_instance()
+    while True:
+        time.sleep(300)
 
 
 if __name__ == '__main__':

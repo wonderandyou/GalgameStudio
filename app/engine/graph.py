@@ -42,6 +42,8 @@ def safe_asset(root, value):
     最后还会 resolve 一次再用 is_relative_to 兜底：符号链接也能穿过前四条。
     """
     path = PurePosixPath(value)
+    if not value:
+        raise ValueError('资产路径是空字符串（这个字段要么填一个 assets/ 下的路径，要么留空不填）')
     if '\\' in value or ':' in value or path.is_absolute() or '..' in path.parts or not path.parts or path.parts[0] != 'assets':
         raise ValueError(f'非法资产路径: {value}')
     if root is None:
@@ -225,19 +227,31 @@ def is_strict_graph(graph):
     return (graph.get('agent_state') or {}).get('skeleton') is not None
 
 
-def apply_graph(graph, *, source):
+def apply_graph(graph, *, source, previous=None):
     """D3：**所有**写入路径的唯一入口。先重算 edges，再查 I1–I8。
 
     - 有 skeleton（新流程产物）：任何问题都整体拒绝（GraphRejected），没有 source 能跳过。
-    - 无 skeleton（存量旧图）：只重算 edges + log.warning 列出全部 problems，放行，
-      不改 edges 以外的任何数据。
+    - 无 skeleton（存量旧图）且**改坏了一张本来合法的图**：同样拒绝。
+      宽松放行的本意是「不锁死本来就跑不过 I1–I8 的存量图」，
+      不是「允许把好图改成坏图」—— 新建项目的图、编辑器存盘的图都属于这一类。
+    - 无 skeleton 且旧图本来就有问题：只重算 edges + log.warning 列出全部 problems，放行，
+      不改 edges 以外的任何数据（保住存量旧项目的可编辑性）。
     `source` 只用于日志（api.save / agent.commit / pipeline.save / checkpoint.restore …）。
+    `previous` 是**磁盘上当前那份图**，只有 api.save 这类"覆盖已有图"的路径才传。
     """
     graph = normalize_graph(graph)
     problems = structure_problems(graph)
     if not problems:
         return graph
     if not is_strict_graph(graph):
+        if previous is not None:
+            # ★ 改坏护栏：旧图合法 → 这次提交把它改坏了 → 拒，别写盘。
+            # 典型的坏事方式就是删掉起始节点的出口，之后导出直接 409。
+            before = structure_problems(normalize_graph(previous))
+            if not before:
+                log.warning('写入被拒 source=%s（旧图合法，本次提交破坏 I1–I8）problems=%d first=%s',
+                            source, len(problems), problems[0])
+                raise GraphRejected(source, problems)
         log.warning('存量旧图（无 skeleton）有 %d 项结构问题，仅重算 edges 后放行 source=%s：%s',
                     len(problems), source, '；'.join(problems))
         return graph
@@ -293,7 +307,7 @@ def validate_graph(graph, root=None, auto_voice=True):
     # ---- 4~6. 逐节点检查（出口形态 + 语音时长 + 资产）----
     for n in nodes:
         paths = [n['bg']['asset']] + [c['pose'] for c in n['chars']]
-        for line in n['lines']:
+        for index, line in enumerate(n['lines']):
             if auto_voice and not line['voice']:
                 raise ValueError('缺少 voice')
             # 按字数估时长只对「成句」的台词成立：短句（「嗯」「能」这类）
@@ -309,15 +323,32 @@ def validate_graph(graph, root=None, auto_voice=True):
                 raise ValueError(f'语音时长明显不合理：{line["dur"]:.2f} 秒配 {text_len} 个字')
             if line['voice']:
                 paths.append(line['voice'])
-                if root and abs(wav_duration(line['voice']) - line['dur']) >= 0.15:
-                    raise ValueError('语音实际时长不一致')
+                if root:
+                    actual = wav_duration(line['voice'])
+                    if abs(actual - line['dur']) >= 0.15:
+                        # P2-4：报出是哪个节点的第几句，用户才知道去改哪儿
+                        raise ValueError(
+                            f'语音实际时长不一致：节点 {n["id"]} 第 {index + 1} 句'
+                            f'（lines[{index}]，{line["voice"]}）'
+                            f'期望 dur={line["dur"]:.2f} 秒，实际 {actual:.2f} 秒')
         for asset in paths:
             checked_asset(asset)
 
 
     # ---- 8. 角色立绘 ----
     for character in graph['characters']:
-        checked_asset(character['ref_image'])
+        ref = character.get('ref_image') or ''
+        if not ref:
+            # ★ 角色**可以不绑参考图**（建角色时允许只填名字）。
+            #   以前这里直接 checked_asset('')，报一句 `非法资产路径: `（冒号后面是空的），
+            #   用户既不知道是哪个角色、哪一项，而且整个项目永远导不出去。
+            continue
+        try:
+            checked_asset(ref)
+        except ValueError as exc:
+            raise ValueError(
+                f'角色 {character.get("id")}（{character.get("name") or "未命名"}）'
+                f'的参考图 ref_image 有问题：{exc}') from exc
     return graph
 
 

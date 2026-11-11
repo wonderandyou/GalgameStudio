@@ -14,6 +14,7 @@ import uuid
 from fastapi import APIRouter
 
 from .mock_api import gate_graph, jobs
+from .asset_records import read_records
 from .providers.base import ProviderError
 from .store import atomic_json, read_json
 
@@ -195,6 +196,61 @@ async def create_character(pid: str, body: dict):
         return await asyncio.to_thread(run)
 
 
+def _refs_path(pid):
+    return jobs.project_path(pid) / 'refs.json'
+
+
+def _read_refs(pid):
+    """读角色参考图登记表（refs.json）；坏掉就当空表，别让删角色失败。"""
+    try:
+        return read_records(jobs.project_path(pid), 'refs.json')
+    except (ProviderError, ValueError, OSError):
+        return []
+
+
+def _write_refs(pid, items):
+    atomic_json(_refs_path(pid), dict(version=1, items=items))
+
+
+def _unbind_references(pid, cid):
+    """删角色时把参考图上的绑定摘掉。
+
+    ★ 只清 character_id 不够：`pipeline.ensure_characters_from_references`
+    的过滤条件是「kind=character 且有 name 或 character_id」，
+    参考图上还留着名字（例如「小林」）→ 下一次生成还会按名字把这个角色建回来。
+    所以额外打 `detached` 标记：图和名字都留着（用户以后还能继续用），
+    但生成器看到它就跳过。用户重新把图挂到某个角色上时标记会被清掉。
+    """
+    items = _read_refs(pid)
+    changed = False
+    for ref in items:
+        if not isinstance(ref, dict):
+            continue
+        if str(ref.get('character_id') or '') == cid:
+            ref['character_id'] = ''
+            ref['detached'] = True
+            changed = True
+    if changed:
+        _write_refs(pid, items)
+    return changed
+
+
+def _rename_references(pid, cid, name):
+    """角色改名后同步参考图上记的名字，否则素材库还显示旧名。"""
+    items = _read_refs(pid)
+    changed = False
+    for ref in items:
+        if isinstance(ref, dict) and str(ref.get('character_id') or '') == cid:
+            if ref.get('name') != name:
+                ref['name'] = name
+                changed = True
+            if ref.pop('detached', None) is not None:
+                changed = True
+    if changed:
+        _write_refs(pid, items)
+    return changed
+
+
 @router.patch('/projects/{pid}/characters/{cid}')
 async def update_character(pid: str, cid: str, body: dict):
     """改名 / 改性别 / 改配色 / 改外形锚点。"""
@@ -213,6 +269,8 @@ async def update_character(pid: str, cid: str, body: dict):
                     raise ProviderError('CHARACTER_NAME_TAKEN', f'已经有叫「{name}」的角色了',
                                         WHERE, 409, field='name')
                 item['name'] = name
+                # 参考图跟着改名，否则素材库还显示旧名字（删角色时也一样对不上）
+                _rename_references(pid, cid, name)
             if 'gender' in body:
                 item['gender'] = _clean_gender(body.get('gender'))
             if 'color' in body:
@@ -289,6 +347,10 @@ async def delete_character(pid: str, cid: str, force: int = 0):
 
             graph['characters'] = [c for c in characters if str(c.get('id')) != cid]
             _save_graph(pid, graph)
+            # ★ 参考图必须一起解绑（无条件，不看 total）：不清的话下一次生成
+            #   会按 refs.json 里的名字把刚删掉的角色重新建出来。
+            if _unbind_references(pid, cid):
+                counts['references'] = counts.get('references', 0) + 1
             return dict(ok=True, id=cid, cleared=counts)
 
         return await asyncio.to_thread(run)

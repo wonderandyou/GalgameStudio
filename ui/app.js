@@ -109,12 +109,33 @@
   let autosaveTimer = null;
   let autosaveBusy = false;
   let autosaveDirty = false;
+  // P2-2：最近一次保存失败的原因（status / detail / problems），成功后清空
+  let lastSaveError = null;
 
-  function setSaveBadge(text, cls) {
+  function setSaveBadge(text, cls, title) {
     const el = $('saveState');
     if (!el) return;
     el.textContent = text || '';
     el.className = 'save-state' + (cls ? ' ' + cls : '');
+    el.title = title || '';
+  }
+
+  /** P2-2：保存失败一律在徽标上写明「未保存」。
+      422 = 写入门拒绝（比如场景改成结局后出口不合法）：把后端 error.problems 的第一条直接显示出来，
+      全部原因放在悬停提示里。以前 422 只在控制台里看得到，用户以为存上了，刷新后改动「丢了」。 */
+  function showSaveFailure(auto) {
+    const err = lastSaveError || {};
+    const problems = Array.isArray(err.problems) ? err.problems.filter(Boolean).map(String) : [];
+    // 徽标空间有限：把「n4、n5、n6、…、n13」这种长节点清单压成「n4、n5、…」，原因那半句才看得到
+    const brief = (s) => String(s).replace(/((?:n\d+、){2})(?:n\d+、)*n\d+/g, '$1…');
+    const text = err.status === 422
+      ? '未保存：' + brief(problems[0] || err.detail || '后端拒绝了这次修改')
+      : '未保存：' + (auto ? '自动保存失败' : '保存失败') + '（点「保存」重试）';
+    const tip = [err.status ? 'HTTP ' + err.status : '', err.detail || '']
+      .concat(problems.slice(0, 8).map((p, i) => (i + 1) + '. ' + p))
+      .concat(problems.length > 8 ? ['…共 ' + problems.length + ' 条'] : [])
+      .filter(Boolean).join('\n');
+    setSaveBadge(text, 'error', tip);
   }
 
   function scheduleAutosave() {
@@ -149,7 +170,7 @@
       // 同步轮询基线，否则 2 秒后的比对会把刚存的结果当成"又变了"，白存一次
       try { lastSnapForWatch = snap(); } catch (e) {}
     } else {
-      setSaveBadge('自动保存失败（点「保存」重试）', 'error');
+      showSaveFailure(true);                  // P2-2：422 也要看得见（徽标写「未保存」+ 第一条原因）
       autosaveDirty = true;                   // 留着，下次改动再试
     }
   }
@@ -975,15 +996,10 @@
     return false;
   }
 
-  function autoLayout(silent) {
-    layoutNodes();
-    if (!silent) pushHistory('自动排布');
-    render();
-    if (!silent) {
-      addLog('已自动排布 ' + nodes.length + ' 个节点');
-      toast('已排布，并按窗口适配');
-    }
-  }
+  /* 这里曾经还有一个同名的 `autoLayout(silent)`（走 layoutNodes + pushHistory）。
+     函数声明互相覆盖，能进历史栈的那份从来没被调用过：工具栏绑到的是下面
+     「按拓扑层级」那份，所以「自动排布」一直不进撤销栈、撤销按钮始终是灰的（P2-E7）。
+     现在只留一个实现，历史在最下面那份里 push。 */
 
   function render() {
     initEditor();
@@ -1390,6 +1406,7 @@
 
   // 自动排布：按拓扑层级
   function autoLayout() {
+    pushHistory('自动排布');    // 先存排布前的 pos，撤销才能回到原来位置（P2-E7）
     const level = {};
     nodes.forEach((n) => { level[n.id] = 0; });
     for (let k = 0; k < 12; k++) {
@@ -2526,7 +2543,7 @@
     const el = $(id);
     return !!(el && el.classList.contains('on'));
   }
-  ['chipVoice', 'chipConsist', 'chipReview', 'chipFinal'].forEach((id) => {
+  ['chipVoice', 'chipArt', 'chipConsist', 'chipReview', 'chipFinal'].forEach((id) => {
     const el = $(id);
     if (!el) return;
     el.addEventListener('click', () => {
@@ -3718,6 +3735,24 @@
     });
     if (row.children.length) box.appendChild(row);
 
+    // ★ 把「从你要求里认出来的颜色词」明确显示出来（2026-11-11）：
+    //   以前配色只认参考图，文字里写「冷蓝」完全无效，用户看不出自己的要求
+    //   有没有被采纳，只觉得「怎么改都是同一套」。认不出来时直接告诉他该怎么写。
+    const analysis = (res && res.analysis) || {};
+    const colorWords = Array.isArray(analysis.color_words) ? analysis.color_words : [];
+    const imageColors = Array.isArray(analysis.image_colors) ? analysis.image_colors : [];
+    const meta = document.createElement('p');
+    meta.className = 'ui-design-note';
+    if (colorWords.length) {
+      meta.textContent = '从你的要求里认出的颜色：' + colorWords.join('、');
+    } else if (imageColors.length) {
+      meta.textContent = '要求里没认出颜色词 —— 这次配色取自参考图。';
+    } else {
+      meta.textContent = '要求里没认出颜色词，也没传参考图 —— 用的是这套骨架自带的配色。'
+        + '想让配色变，要求里直接写颜色：冷蓝 / 霓虹紫 / 暖黄 / 墨绿 / 酒红 / 樱花粉…';
+    }
+    box.appendChild(meta);
+
     const screens = (res && Array.isArray(res.screens)) ? res.screens : [];
     if (!screens.length) {
       const note = document.createElement('p');
@@ -3988,6 +4023,7 @@
     // 手动保存时把排队的自动保存取消掉，免得紧接着又存一遍
     if (!quiet && autosaveTimer) { clearTimeout(autosaveTimer); autosaveTimer = null; }
     autosaveDirty = false;
+    lastSaveError = null;
     if (GalAPI.mode === 'mock') {
       if (!quiet) toast('模拟模式下不用保存（切到真后端才有得存）');
       return false;
@@ -4017,6 +4053,7 @@
       const kept = nodes.filter((n) => rawById[n.id]).length;
       addLog('画布已保存：' + nodes.length + ' 节点 / ' + links.length + ' 连线（保留后端元信息 ' +
         kept + '/' + nodes.length + '）');
+      window.__galLastSaveError = null;
       if (!quiet) {
         toast('已保存 ' + nodes.length + ' 节点 / ' + links.length + ' 连线');
         setSaveBadge('已保存', 'saved');
@@ -4024,8 +4061,14 @@
       return true;
     }
     const d = (res && res.detail) || '未知错误';
-    addLog('保存失败：' + d);
-    if (!quiet) toast('保存失败：' + d);
+    lastSaveError = { status: res && res.status, detail: d, problems: (res && res.problems) || null };
+    window.__galLastSaveError = lastSaveError;   // 调试 / 自动化观测
+    const firstProblem = Array.isArray(lastSaveError.problems) && lastSaveError.problems[0];
+    addLog('保存失败：' + d + (firstProblem && firstProblem !== d ? ' —— ' + firstProblem : ''));
+    if (!quiet) {
+      toast('保存失败：' + (firstProblem || d));
+      showSaveFailure(false);                  // 手动保存失败也在徽标上留痕，不只闪一下 toast
+    }
     return false;
   }
 
@@ -4146,6 +4189,7 @@
       flavor_branches: +$('rngFlavor').value,
       branch_depth: +$('rngBranch').value,
       auto_voice: chipOn('chipVoice'),
+      auto_art: chipOn('chipArt'),
       consistency: chipOn('chipConsist'),
       review_per_node: chipOn('chipReview'),
       final_check: chipOn('chipFinal'),
@@ -4770,9 +4814,55 @@
     });
   }
 
+  /* 卡片状态只能从 /api/providers 的 enabled 或实测结果派生 ——
+     P2-C：原来 HTML 里写死「已连接 / 延迟 412ms · 余额正常」，接口全没配也照显示，
+     用户点「测试连接」拿到 MISSING_API_KEY，标题还是「已连接」。 */
+  const CARD_STATE = {
+    none:  { dot: '',    text: '未配置',   hint: '未测试',             cls: 'hint' },
+    ready: { dot: '',    text: '待测试',   hint: '已配置，点「测试连接」验证', cls: 'hint' },
+    run:   { dot: 'run', text: '测试中…',  hint: '测试中…',            cls: 'hint' },
+    ok:    { dot: 'ok',  text: '已连接',   hint: '',                   cls: 'hint ok' },
+    bad:   { dot: '',    text: '测试失败', hint: '',                   cls: 'hint bad' }
+  };
+
+  /** 改一张卡片的状态：灰点/绿点/黄点 + 标题 + 副标题一起动 */
+  function setCardState(card, state, detail) {
+    if (!card) return;
+    const conf = CARD_STATE[state] || CARD_STATE.none;
+    const dot = card.querySelector('.dot');
+    if (dot) dot.className = 'dot' + (conf.dot ? ' ' + conf.dot : '');
+    const box = card.querySelector('.state');
+    let txt = card.querySelector('.state-txt');
+    if (!txt && box) {
+      txt = document.createElement('span');
+      txt.className = 'state-txt';
+      box.appendChild(txt);
+    }
+    if (txt) txt.textContent = conf.text;
+    const hint = card.querySelector('.hint');
+    if (hint) {
+      hint.className = conf.cls;
+      hint.textContent = detail || conf.hint;
+    }
+  }
+
+  /** 后端配置 → 每张卡片：enabled=false 就是「未配置」，true 是「待测试」 */
+  function applyProviderStates(cfg) {
+    document.querySelectorAll('.api-card').forEach(function (card) {
+      const kind = providerOf(card);
+      if (!kind) return;
+      if (!cfg) { setCardState(card, 'none', '读不到接口配置'); return; }
+      const item = cfg[kind] || {};
+      if (item.enabled === true) setCardState(card, 'ready');
+      else setCardState(card, 'none');
+    });
+    updateGlobalMeta();   // 「N / 6 就绪」和底部提示都按真实绿点算
+  }
+
   async function loadProviders() {
     const cfg = await GalAPI.getProviders();
     if (cfg) { applyProviders(cfg); addLog('已载入接口配置'); }
+    applyProviderStates(cfg);
   }
 
   async function saveProviders(silent) {
@@ -4799,29 +4889,24 @@
   document.querySelectorAll('.test').forEach((b) => {
     b.addEventListener('click', async () => {
       const card = b.closest('.api-card');
-      const hint = card.querySelector('.hint');
-      const dot = card.querySelector('.dot');
       const name = b.dataset.name;
       const kind = KIND_BY_NAME[name] || 'llm';
 
-      hint.className = 'hint';
-      hint.textContent = '测试中…';
-      dot.className = 'dot run';
+      setCardState(card, 'run', '测试中…');
       addLog('测试连接：' + name + '（' + kind + '）');
 
       const r = await GalAPI.testProvider(kind);
       if (r && r.ok) {
-        dot.className = 'dot ok';
-        hint.className = 'hint ok';
-        hint.textContent = '连接正常 · ' + (r.latency_ms || 0) + 'ms';
+        setCardState(card, 'ok', '连接正常 · ' + (r.latency_ms || 0) + 'ms');
         addLog('✔ ' + name + ' 正常 ' + (r.latency_ms || 0) + 'ms');
         toast(name + ' 连接正常');
       } else {
-        dot.className = 'dot';
-        hint.className = 'hint bad';
-        hint.textContent = (r && r.detail) || '连接失败';
-        addLog('✖ ' + name + ' 失败：' + ((r && r.detail) || '未知原因'));
-        toast(name + ' 连不上');
+        const msg = (r && (r.detail || (r.error && r.error.message))) || '连接失败';
+        // 后端说「没配 key」时不是「测试失败」，是「未配置」——标题要跟着变
+        const notConfigured = /MISSING|未配置|API ?key/i.test(String(msg));
+        setCardState(card, notConfigured ? 'none' : 'bad', msg);
+        addLog('✖ ' + name + ' 失败：' + msg);
+        toast(name + (notConfigured ? ' 还没配置' : ' 连不上'));
       }
       updateGlobalMeta();
     });
@@ -4836,6 +4921,11 @@
     document.querySelectorAll('#modeSwitch button').forEach((b) => {
       b.classList.toggle('on', b.dataset.mode === GalAPI.mode);
     });
+    // ★ 播放器底栏那句「这是模拟数据」原来写死在 HTML 里，真后端模式也一直挂着
+    //   （Kimi 实测指出）。真模式下读的就是项目里的 assets/voice 与 assets/bg，
+    //   没有任何模拟成分，所以隐藏它；模拟模式才显示。
+    const hint = $('plMetaHint');
+    if (hint) hint.style.display = real ? 'none' : '';
   }
 
   document.querySelectorAll('#modeSwitch button').forEach((b) => {
@@ -4869,19 +4959,43 @@
     // 破坏性操作要二次确认：有内容时才弹，空着直接清不啰嗦
     const inputs = document.querySelectorAll('.api-card input[type=password]');
     const hasValue = Array.prototype.some.call(inputs, (i) => !!i.value);
+    const doClear = async () => {
+      inputs.forEach((i) => { i.value = ''; });
+      try { localStorage.removeItem('gal_providers'); } catch (err) {}
+      addLog('已清空本页密钥');
+      // ★ 真的把后端凭据里的 key 删掉。后端约定 `api_key: ''` = 明确清除。
+      //   ⚠ `GalAPI.saveProviders` 失败时**返回 {ok:false}、不抛异常** ——
+      //   所以不能只靠 try/catch，必须检查返回值，否则后端 500 时照样提示
+      //   「已清除 3 个接口」（第三轮验证抓到的 P2-A，隐私相关：用户以为清掉了其实还在）。
+      let cleared = 0;
+      const failed = [];
+      for (const kind of ['qwen_image', 'bailian_tts', 'llm']) {
+        try {
+          const res = await GalAPI.saveProviders({ [kind]: { api_key: '', enabled: false } });
+          if (res && res.ok) cleared += 1;
+          else failed.push(kind + (res && res.detail ? '（' + res.detail + '）' : ''));
+        } catch (err) {
+          failed.push(kind);
+        }
+      }
+      if (failed.length) {
+        toast('清除失败：' + failed.join('、') + ' · 密钥可能还在本机');
+        addLog('清除密钥失败：' + failed.join('、'));
+      } else if (cleared) {
+        toast('已清除 ' + cleared + ' 个接口保存的密钥');
+        addLog('已清除 ' + cleared + ' 个接口在凭据文件里的 key');
+      } else {
+        toast('已清空输入框');
+      }
+      loadProviders();
+    };
     if (hasValue) {
-      popconfirm(e.currentTarget, '清空这一页填写的所有密钥？只清输入框，后端凭据文件不受影响。', () => {
-        inputs.forEach((i) => { i.value = ''; });
-        try { localStorage.removeItem('gal_providers'); } catch (err) {}
-        addLog('已清空本页密钥');
-        toast('已清空密钥（后端凭据文件没动，需在设置里删）');
-      }, '清空');
+      popconfirm(e.currentTarget,
+        '清空已保存的密钥？会同时删掉后端凭据文件里的 key，删了不能恢复。',
+        doClear, '清空');
       return;
     }
-    inputs.forEach((i) => { i.value = ''; });
-    try { localStorage.removeItem('gal_providers'); } catch (e) {}
-    addLog('已清空本页密钥');
-    toast('已清空密钥（后端凭据文件没动，需在设置里删）');
+    doClear();
   });
 
   /* ---------------- 导出 ---------------- */
@@ -4950,7 +5064,9 @@
       });
     });
   }
-  addLog('接口就绪：千问生图 / 百炼 TTS / DeepSeek；本地 ComfyUI 在线，本地 TTS 未启动');
+  // ★ 以前这行写死「本地 ComfyUI 在线，本地 TTS 未启动」—— 纯属编的：
+  //   实际哪个接口在线要看各自探测结果（上方状态卡）。日志不能撒谎。
+  addLog('界面就绪：各接口的真实状态看上方状态卡（绿点=已配置）');
   addLog('演示项目已载入：' + nodes.length + ' 节点 / ' + links.length + ' 连线（生成后换成后端数据）');
 
   // 支持 ?view=editor / ?view=export / &player=1 直接跳到某页（也方便截图自检）
@@ -5593,8 +5709,15 @@
    */
   function playDeepLink() {
     if (qp.get('player') !== '1') return;
-    openPlayer();
     const nid = qp.get('node');
+    // P2-R：真后端下没有任何项目上下文时，画布上还是内置的 9 节点演示数据，
+    // 静默播出来就成了「深链接好像坏了」（用户看到 n1 / 1/9）。明确提示，不播 demo。
+    if (nid && GalAPI.mode === 'real' && !projectId) {
+      addLog('试玩深链接：还没打开项目，定位不到节点 ' + nid + '（画布上只是演示数据）');
+      toast('深链接需要先打开对应项目（顶部「项目」→ 点一个），再打开这条链接');
+      return;
+    }
+    openPlayer();
     if (!nid) return;
     if (!nodes.some((x) => x.id === nid)) {
       addLog('试玩深链接：当前项目里没有节点 ' + nid + '，从开头播');

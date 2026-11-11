@@ -217,7 +217,11 @@ class Pipeline:
         items = await asyncio.to_thread(read_records, self.root, 'refs.json')
         wanted = [item for item in items
                   if item.get('kind') == 'character'
-                  and (item.get('name') or item.get('character_id'))]
+                  and (item.get('name') or item.get('character_id'))
+                  # ★ detached：用户把挂在这张参考图上的角色删了。
+                  #   图和名字都还留着，但不能再按它自动重建角色 ——
+                  #   否则「删掉的角色下一次生成又冒出来」。
+                  and not item.get('detached')]
         if not wanted:
             return
         characters = {c['id']: c for c in self.graph['characters']}
@@ -512,6 +516,25 @@ class Pipeline:
         各自结算失败，画完由导演验收、不合格带着新描述重画。
         """
         await self.agent('art', 'run', 0.0, '按编剧排产表开工')
+        if not self.params.get('auto_art', True):
+            # ★ 用户明确关掉美术：只跑编剧，图全用占位。
+            #   必须在这里先落三张占位（bg / char / ref），否则骨架里引用的
+            #   assets/bg/mock.png 等不存在，validate_graph 会把整轮判死。
+            await self.log('美术阶段已关闭（auto_art=false）→ 全部使用占位图，不调用任何生图接口',
+                           level='info')
+            # ★ 用户**主动关掉**美术，不算降级：标 'off'，绝不能进 `degraded`。
+            #   以前这里调的是 degrade()，而任务收尾时 `mock=bool(self.degraded)` ——
+            #   于是真实模式跑出来的任务在 done 事件里 mock=True，
+            #   用户以为这次没用真模型、没花钱（第三轮验证的 P2-D）。
+            self.stages['art'] = 'off'
+            self.impacts['art'] = OFF_IMPACTS['art']
+            for rel, data in (('assets/bg/mock.png', png(64, 36, (35, 50, 75, 255))),
+                              ('assets/char/mock.png', png(32, 64, (125, 86, 155, 255))),
+                              ('assets/ref/mock.png', png(32, 64, (125, 86, 155, 255)))):
+                await self.save_asset(rel, data)
+            await self.ensure_style()
+            self.state['art'] = dict(backgrounds=dict(skipped=True), poses=dict(skipped=True))
+            return
         if self.providers.get('art') is None:
             reason = self.unavailable.get('art', '没有可用的图像 provider')
             # 参考图是「加分项」，不是「必需项」。
@@ -636,7 +659,15 @@ class Pipeline:
             status = self.stages.get(required)
             impact = self.impacts.get(required, '')
             inputs[required] = dict(status=status, impact=impact)
-            off_allowed = required == 'voice' and status == 'off' and not self.params.get('auto_voice', True)
+            # ★ 'off' 是**用户主动关掉的阶段**，不算失败，下游要能接受：
+            #   以前只放行 voice，于是 auto_art=false 时 build（依赖 art）会
+            #   STAGE_PREREQUISITE_FAILED 直接挂掉。art 的 off 也必须放行。
+            off_allowed = (
+                (required == 'voice' and status == 'off'
+                 and not self.params.get('auto_voice', True))
+                or (required == 'art' and status == 'off'
+                    and not self.params.get('auto_art', True))
+            )
             if required not in self.state.get('completed', ()) or (
                     status not in ('real', 'mock') and not off_allowed):
                 raise ProviderError('STAGE_PREREQUISITE_FAILED', f'{stage} 缺少可用的 {required} 产出',
@@ -646,6 +677,7 @@ class Pipeline:
 
     async def check_stage(self, stage, evidence):
         if (stage == 'voice' and not self.params.get('auto_voice', True)
+                or stage == 'art' and not self.params.get('auto_art', True)
                 or stage == 'review' and not self.params.get('final_check')):
             self.stages[stage] = 'off'
             self.impacts[stage] = OFF_IMPACTS[stage]

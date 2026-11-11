@@ -208,7 +208,9 @@
         const body = await r.json().catch(function () { return {}; });
         if (!r.ok) {
           const msg = (body && body.error && body.error.message) || ('HTTP ' + r.status);
-          return { ok: false, detail: msg, status: r.status };
+          // P2-2：422 时把写入门的全部 problems 带回去，界面徽标要显示第一条
+          const problems = (body && body.error && Array.isArray(body.error.problems)) ? body.error.problems : null;
+          return { ok: false, detail: msg, status: r.status, problems: problems };
         }
         return { ok: true, raw: body };
       } catch (e) {
@@ -714,6 +716,19 @@
   const baseParam = qs.get('base');
   if (baseParam) {
     GalAPI.base = /^https?:/.test(baseParam) ? baseParam : 'http://127.0.0.1:' + baseParam;
+  }
+  // ★ ?mode=real / ?mode=mock 必须**在这里**生效，而且优先于 localStorage 里上次的选择。
+  //   以前只读了 ?base=、完全没读 ?mode= —— 于是全新配置目录里打开
+  //   `?mode=real&player=1&node=n54` 时，加载期 GalAPI.mode 还是 mock：
+  //     · app.js 的 `if (GalAPI.mode === 'real') { restoreLastProject().then(...) }` 整段被跳过
+  //     · 末尾的 `if (GalAPI.mode !== 'real') playDeepLink()` 也被跳过
+  //   两条路都不走 → 播放器进不去，停在 9 节点演示项目（1/9）。
+  //   第二次打开之所以正常，是因为第一次已经把 gal_mode 写成了 real。
+  //   启动器每次用新的 GalgameStudio-edge-<pid> 配置目录，所以每次都命中这个 bug。
+  const modeParam = qs.get('mode');
+  if (modeParam === 'real' || modeParam === 'mock') {
+    GalAPI.mode = modeParam;
+    try { localStorage.setItem('gal_mode', modeParam); } catch (e) { /* 隐私模式下可能抛 */ }
   }
 
 })(window);

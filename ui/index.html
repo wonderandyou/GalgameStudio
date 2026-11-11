@@ -13,7 +13,7 @@
        遮罩不但多余，它那 280ms 的淡出本身就会被看成"界面消失一下又回来"。 */
   html, body { background: #f2f4f8; margin: 0; }
 </style>
-<link rel="stylesheet" href="app.css?v=17943151224986">
+<link rel="stylesheet" href="app.css?v=17943560303577">
 <link rel="stylesheet" href="vendor/litegraph.css">
 </head>
 <body>
@@ -70,7 +70,7 @@
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M12 4v9"/><circle cx="12" cy="17" r="2"/></svg>
     低功耗
   </button>
-  <div class="meta"><span class="mode-badge" id="modeBadge">模拟</span><span id="globalMeta"><span class="tp"></span> 3 个接口就绪 · 本地 ComfyUI 已连接</span></div>
+  <div class="meta"><span class="mode-badge" id="modeBadge">模拟</span><span id="globalMeta"><span class="tp"></span> 正在读取接口配置…</span></div>
   <div class="wincontrols">
     <button id="btnWinMin" title="最小化"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M2 6h8" stroke="currentColor" stroke-width="1.6"/></svg></button>
     <button class="close" id="btnWinClose" title="关闭"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M2.4 2.4l7.2 7.2M9.6 2.4L2.4 9.6" stroke="currentColor" stroke-width="1.6"/></svg></button>
@@ -163,7 +163,7 @@
         </div>
         <div class="side">
           已就绪 <b id="readyCount">0 / 6</b><br>
-          密钥只存在本机 <code>%LOCALAPPDATA%\GalgameStudio\credentials.json</code>
+          密钥只存在本机用户数据目录（默认 <code>%LOCALAPPDATA%\GalgameStudio</code>）
         </div>
       </div>
 
@@ -176,7 +176,7 @@
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.6" cy="9.6" r="1.5"/><path d="m3.5 17 5-4.6 4 3.6 3-2.6 5 3.6"/></svg>
             </div>
             <div><div class="t">通义千问 · 生图</div><div class="s">DashScope / 万相 · 云端出背景与立绘</div></div>
-            <div class="state"><span class="dot ok"></span>已连接</div>
+            <div class="state"><span class="dot"></span><span class="state-txt">未配置</span></div>
           </div>
           <div class="api-body">
             <div class="field"><label>API Key</label><input type="password" value="sk-••••••••••••••••••••••••3f7a"></div>
@@ -187,7 +187,7 @@
           </div>
           <div class="api-foot">
             <button class="btn sm test" data-name="千问生图">测试连接</button>
-            <span class="hint ok">延迟 412ms · 余额正常</span>
+            <span class="hint">未测试</span>
             <button class="btn sm link" data-help="qwen">怎么申请</button>
             <button class="btn sm link" data-open-url="https://bailian.console.aliyun.com/">前往网站 ↗</button>
           </div>
@@ -199,7 +199,7 @@
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 10v4"/></svg>
             </div>
             <div><div class="t">百炼 · 语音合成</div><div class="s">CosyVoice v2 · 逐句配音</div></div>
-            <div class="state"><span class="dot ok"></span>已连接</div>
+            <div class="state"><span class="dot"></span><span class="state-txt">未配置</span></div>
           </div>
           <div class="api-body">
             <div class="field"><label>API Key</label><input type="password" value="sk-••••••••••••••••••••••••91cd"></div>
@@ -210,7 +210,7 @@
           </div>
           <div class="api-foot">
             <button class="btn sm test" data-name="百炼 TTS">测试连接</button>
-            <span class="hint ok">延迟 640ms · 采样率 24kHz</span>
+            <span class="hint">未测试</span>
             <button class="btn sm link" data-help="tts">怎么申请</button>
             <button class="btn sm link" data-open-url="https://bailian.console.aliyun.com/">前往网站 ↗</button>
           </div>
@@ -222,7 +222,7 @@
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 4.6 7.4v9.2L12 20.8l7.4-4.2V7.4L12 3.2Z"/><path d="M12 12v8.8M4.6 7.4 12 12l7.4-4.6"/></svg>
             </div>
             <div><div class="t">大语言模型 · 剧本</div><div class="s">DeepSeek / 任意 OpenAI 兼容</div></div>
-            <div class="state"><span class="dot ok"></span>已连接</div>
+            <div class="state"><span class="dot"></span><span class="state-txt">未配置</span></div>
           </div>
           <div class="api-body">
             <div class="field"><label>Base URL</label><input value="https://api.deepseek.com/v1"></div>
@@ -234,7 +234,7 @@
           </div>
           <div class="api-foot">
             <button class="btn sm test" data-name="LLM">测试连接</button>
-            <span class="hint ok">延迟 780ms · 上下文 64k</span>
+            <span class="hint">未测试</span>
             <button class="btn sm link" data-help="llm">怎么申请</button>
             <button class="btn sm link" data-open-url="https://platform.deepseek.com/api_keys">前往网站 ↗</button>
           </div>
@@ -251,7 +251,7 @@
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18M3 9h18M3 15h18"/></svg>
             </div>
             <div><div class="t">ComfyUI · 本地生图</div><div class="s">Qwen-Image 2.1 · 1024 出图</div></div>
-            <div class="state"><span class="dot ok"></span>已连接</div>
+            <div class="state"><span class="dot"></span><span class="state-txt">未配置</span></div>
           </div>
           <div class="api-body">
             <div class="field-row">
@@ -263,7 +263,7 @@
           </div>
           <div class="api-foot">
             <button class="btn sm test" data-name="ComfyUI">测试连接</button>
-            <span class="hint ok">队列空闲 · 平均 52s/张</span>
+            <span class="hint">未测试</span>
           </div>
         </div>
 
@@ -273,7 +273,7 @@
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.6" width="6" height="11" rx="3"/><path d="M5.5 11.4a6.5 6.5 0 0 0 13 0M12 17.9V21M9 21h6"/></svg>
             </div>
             <div><div class="t">本地 TTS</div><div class="s">F5-TTS / GPT-SoVITS · 音色克隆</div></div>
-            <div class="state"><span class="dot run"></span>未启动</div>
+            <div class="state"><span class="dot"></span><span class="state-txt">未配置</span></div>
           </div>
           <div class="api-body">
             <div class="field-row">
@@ -285,7 +285,7 @@
           </div>
           <div class="api-foot">
             <button class="btn sm test" data-name="本地 TTS">测试连接</button>
-            <span class="hint bad">连接被拒绝 · 请先启动服务</span>
+            <span class="hint">未测试</span>
           </div>
         </div>
 
@@ -295,7 +295,7 @@
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 3.8 8v8L12 20.5 20.2 16V8L12 3.5Z"/><path d="m3.8 8 8.2 4.6L20.2 8"/><path d="M12 12.6V20"/></svg>
             </div>
             <div><div class="t">本地 LLM（可选）</div><div class="s">Ollama / LM Studio · OpenAI 兼容</div></div>
-            <div class="state"><span class="dot"></span>未配置</div>
+            <div class="state"><span class="dot"></span><span class="state-txt">未配置</span></div>
           </div>
           <div class="api-body">
             <div class="field"><label>Base URL</label><input placeholder="http://127.0.0.1:11434/v1"></div>
@@ -306,7 +306,7 @@
           </div>
           <div class="api-foot">
             <button class="btn sm test" data-name="本地 LLM">测试连接</button>
-            <span class="hint">不填则回落到云端剧本模型</span>
+            <span class="hint">未测试</span>
           </div>
         </div>
 
@@ -387,6 +387,7 @@
           </div>
           <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap">
             <button class="chip on" id="chipVoice" data-param="auto_voice" title="生成时自动合成语音；关掉只出文字">自动配音</button>
+            <button class="chip on" id="chipArt" data-param="auto_art" title="生成时自动出图；关掉后背景/立绘全部用占位图，一个生图接口都不调（联调文本时省钱）">自动生图</button>
             <button class="chip on" id="chipConsist" data-param="consistency" title="所有节点共用同一张角色参考图；关掉每个节点各画一张">角色一致性</button>
             <button class="chip" id="chipReview" data-param="review_per_node" title="生成完逐个节点过审，每个节点点「通过」或「驳回并写理由」，驳回的可单独重画">逐节点审核</button>
             <button class="chip" id="chipFinal" data-param="final_check" title="全部生成完后，多跑一个独立的质检 Agent 把成品完整查一遍，给判定和分数">收尾验证</button>
@@ -571,8 +572,8 @@
       <section class="asset-panel voice-panel">
         <div class="asset-panel-head"><div><span class="asset-kicker">AUDIO INPUT</span><h2>语音素材</h2></div><span class="asset-count" id="voiceCount">0 条</span></div>
         <div class="voice-drop" id="voiceDrop" tabindex="0" role="button" aria-label="上传语音">
-          <input type="file" id="voiceFile" accept=".wav,.mp3,.ogg,.m4a,audio/*" multiple hidden>
-          <div class="voice-drop-icon">♪</div><div><b>拖入或选择语音</b><span>WAV / MP3 / OGG / M4A · ≤ 20 MB</span></div>
+          <input type="file" id="voiceFile" accept=".wav,audio/wav" multiple hidden>
+          <div class="voice-drop-icon">♪</div><div><b>拖入或选择语音</b><span>WAV（PCM）· ≤ 20 MB</span></div>
           <select id="voiceCharacter" title="上传时标注角色"><option value="">未标注角色</option></select>
         </div>
         <div class="asset-inline-error" id="voiceError" role="alert" hidden></div>
@@ -792,7 +793,7 @@
       <span>语音 <b id="plVoice">4.2s</b></span>
       <span>分支 <b id="plBranches">2</b></span>
       <div style="flex:1"></div>
-      <span style="color:var(--dim2)">这是模拟数据 · 真实播放时读 assets/voice 与 assets/bg</span>
+      <span id="plMetaHint" style="color:var(--dim2)">这是模拟数据 · 真实播放时读 assets/voice 与 assets/bg</span>
     </div>
   </div>
 </div>
@@ -838,12 +839,12 @@
   <img id="insZoomImg" alt="">
 </div>
 
-<script src="api.js?v=17943151224986"></script>
-<script src="vendor/litegraph.js?v=17943151224986"></script>
-<script src="graph-editor.js?v=17943151224986"></script>
-<script src="app.js?v=17943151224986"></script>
-<script src="assets.js?v=17943151224986"></script>
-<script src="e2e.js?v=17943151224986"></script>
-<script src="frontend-verify.js?v=17943151224986"></script>
+<script src="api.js?v=17943560303577"></script>
+<script src="vendor/litegraph.js?v=17943560303577"></script>
+<script src="graph-editor.js?v=17943560303577"></script>
+<script src="app.js?v=17943560303577"></script>
+<script src="assets.js?v=17943560303577"></script>
+<script src="e2e.js?v=17943560303577"></script>
+<script src="frontend-verify.js?v=17943560303577"></script>
 </body>
 </html>

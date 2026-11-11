@@ -1216,6 +1216,13 @@ body.low-power .add-menu {
 .save-state.saving  { color: var(--theme1); }
 .save-state.saved   { color: #059669; }
 .save-state.error   { color: #dc2626; font-weight: 600; }
+/* P2-2：保存失败时做成红底徽标，原因太长就省略号，悬停看全部 problems */
+.save-state.error {
+  display: inline-block; vertical-align: middle; max-width: 300px; min-width: 0; flex: 0 1 auto;
+  overflow: hidden; text-overflow: ellipsis;
+  background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px;
+  padding: 1px 8px; cursor: help;
+}
 
 /* ---------- 气泡确认 popconfirm（替代 window.confirm） ---------- */
 .popconfirm {

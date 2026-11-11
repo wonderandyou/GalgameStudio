@@ -411,7 +411,7 @@ class RealModeDegradeTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.manager = mock_api.Jobs(self.root)
+        self.manager = mock_api.Jobs(self.root, projects_root=self.root / 'projects')
         self.manager.delay = 0.001
         replacements = [
             patch.object(mock_api, 'jobs', self.manager),

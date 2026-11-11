@@ -2450,6 +2450,8 @@ class AgentTools:
                         notes=preset['notes'], file=str(path)),
             screens=rendered,
             analysis=dict(colors=list(design.get('colors') or []),
+                          color_words=list(design.get('color_words') or []),
+                          image_colors=list(design.get('image_colors') or []),
                           matched=list(design.get('matched') or []),
                           contrast=design.get('contrast'),
                           references_used=design.get('references_used', 0)),
@@ -2746,11 +2748,16 @@ class AgentTools:
                     f'要求 {want_nodes} 个节点，实际生成 {len(nodes)} 个')
             want_minutes = self.params.get('target_minutes')
             if want_minutes:
-                lines = [line for node in nodes for line in node['lines']]
-                got = round(len(lines) / 8.125) if lines else 0
+                # ★ 口径必须统一（2026-11-11，第三轮验证 P3-5）：
+                #   `NODES_PER_MINUTE = 8.125` 是「每分钟多少个**节点**」，
+                #   不是每分钟多少行台词。以前这里拿**台词行数**去除它，
+                #   而一个节点通常有 2~5 行台词 → 时长直接虚高 3~5 倍，
+                #   实测「目标 1 分钟」被报成「约 9 分钟」（8 节点 / 73 行台词，
+                #   73 / 8.125 ≈ 9）。按节点数算才和生成端、前端一致。
+                got = round(len(nodes) / 8.125) if nodes else 0
                 if got and abs(got - int(want_minutes)) > int(want_minutes) * 0.4:
                     add('warn', 'DURATION_OFF',
-                        f'目标 {want_minutes} 分钟，按台词量估算约 {got} 分钟')
+                        f'目标 {want_minutes} 分钟，按节点数估算约 {got} 分钟')
 
         errors = sum(1 for item in issues if item['level'] == 'error')
         warns = len(issues) - errors

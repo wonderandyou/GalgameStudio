@@ -133,7 +133,8 @@ class SaveEndpointTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
-        self.manager = mock_api.Jobs(Path(temporary.name))
+        self.manager = mock_api.Jobs(Path(temporary.name),
+                                    projects_root=Path(temporary.name) / 'projects')
         for replacement in (patch.object(mock_api, 'jobs', self.manager), patch.object(mock_api, 'MOCK', True)):
             replacement.start()
             self.addCleanup(replacement.stop)
@@ -155,7 +156,7 @@ class SaveEndpointTests(unittest.TestCase):
         atomic_json(path, graph)
 
     def test_client_edges_ignored(self):
-        """存量旧图：客户端 edges 再脏也不参与；start 长出 27 个出口也照存，edges 按 choices 重算。"""
+        """客户端 edges 再脏也不参与，edges 一律按 choices 重算。"""
         body = self.graph()
         start = next(n for n in body['nodes'] if n['type'] == 'start')
         body['edges'] = [dict(id=f'e{i}', **{'from': start['id']}, port=i, to=start['choices'][0]['to'])
@@ -163,15 +164,45 @@ class SaveEndpointTests(unittest.TestCase):
         saved = self.client.put(f'/api/projects/{self.project_id}/graph', json=body)
         self.assertEqual(saved.status_code, 200, saved.text)
         self.assertEqual(len(self.graph()['edges']), 1)
-        body = self.graph()
-        start = next(n for n in body['nodes'] if n['type'] == 'start')
-        start['choices'] = start['choices'] * 27
-        body['edges'] = body['edges'] * 9
-        saved = self.client.put(f'/api/projects/{self.project_id}/graph', json=body)
-        self.assertEqual(saved.status_code, 200, saved.text)
         disk = read_json(self.manager.project_path(self.project_id) / 'graph.json')
         self.assertEqual(disk['edges'], edges_from_nodes(disk['nodes']))
+
+    def test_legacy_dirty_graph_still_savable(self):
+        """存量旧图（磁盘上**本来就**脏）：继续保存要放行，不能把老项目锁死。
+
+        ★ 这个 fixture 必须直接从磁盘写脏图，不能拿「新建项目的合法图」改成脏的 ——
+        后者是 E8 的场景（把好图改坏），必须被拒，见 test_valid_graph_cannot_be_broken。
+        """
+        path = self.manager.project_path(self.project_id) / 'graph.json'
+        graph = read_json(path)
+        start = next(n for n in graph['nodes'] if n['type'] == 'start')
+        start['choices'] = start['choices'] * 27
+        graph['edges'] = edges_from_nodes(graph['nodes'])
+        atomic_json(path, graph)                     # 模拟历史遗留的脏图
+        body = self.graph()
+        saved = self.client.put(f'/api/projects/{self.project_id}/graph', json=body)
+        self.assertEqual(saved.status_code, 200, saved.text)
+        disk = read_json(path)
+        self.assertEqual(disk['edges'], edges_from_nodes(disk['nodes']))
         self.assertEqual(len(disk['edges']), 27)
+
+    def test_valid_graph_cannot_be_broken(self):
+        """E8 回归：合法图被编辑弄坏（删掉起始节点出口）→ 422，磁盘一个字节都不动。
+
+        以前这里返回 200 并写盘，之后导出永远 409 GRAPH_NOT_READY，
+        而且新项目没有 skeleton，按骨架修复也救不回来。
+        """
+        path = self.manager.project_path(self.project_id) / 'graph.json'
+        before = path.read_bytes()
+        body = self.graph()
+        start = next(n for n in body['nodes'] if n['type'] == 'start')
+        start['choices'] = []
+        rejected = self.client.put(f'/api/projects/{self.project_id}/graph', json=body)
+        self.assertEqual(rejected.status_code, 422, rejected.text)
+        error = rejected.json()['error']
+        self.assertEqual(error['code'], 'GRAPH_REJECTED')
+        self.assertTrue(any('出边' in p for p in error['problems']), error)
+        self.assertEqual(path.read_bytes(), before)
 
     def test_strict_graph_rejected_with_all_problems(self):
         """有 skeleton 的图：start 27 个出口 → 422，错误里列出「出边」，且不落盘。"""

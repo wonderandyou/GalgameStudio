@@ -118,7 +118,9 @@
     if (!file) return '没有选择文件';
     if (file.size > 20 * 1024 * 1024) return 'FILE_TOO_LARGE：「' + file.name + '」超过 20 MB（实际 ' + bytes(file.size) + '）';
     var ext = (file.name.split('.').pop() || '').toLowerCase();
-    var allowed = type === 'ref' ? ['png','jpg','jpeg'] : ['wav','mp3','ogg','m4a'];
+    // 语音只收 PCM WAV：后端 POST /voices 对 mp3/ogg/m4a 一律 415 NEED_WAV（当前环境只装了 WAV 解码）。
+    // 拖拽也走这里，所以白名单必须和 accept 一起收窄，否则拖进来的 mp3 会被后端拒。
+    var allowed = type === 'ref' ? ['png','jpg','jpeg'] : ['wav'];
     if (allowed.indexOf(ext) < 0) return (type === 'ref' ? 'INVALID_IMAGE' : 'INVALID_AUDIO') + '：「' + file.name + '」格式不支持，仅接受 ' + allowed.join(' / ');
     if (!file.size) return 'EMPTY_FILE：「' + file.name + '」是空文件';
     return '';

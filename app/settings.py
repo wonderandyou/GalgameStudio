@@ -7,10 +7,13 @@
   不要塞到这里 —— 换个项目就该换一份。
 """
 import json
+import logging
 import os
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+log = logging.getLogger(__name__)
 
 
 def data_dir() -> Path:
@@ -56,12 +59,97 @@ def write(values: dict) -> dict:
     return values
 
 
+def _frozen() -> bool:
+    """是不是 PyInstaller 打出来的 exe。源码运行没有 sys.frozen。"""
+    return bool(getattr(sys, 'frozen', False))
+
+
+_portable_cache: dict = {}
+
+
+def _portable_projects_dir() -> Path | None:
+    """打包版：exe 旁边的 projects（不在 `_internal` 里）。
+
+    ★★ 为什么必须区分（2026-11-11 实测）：
+      打包版里 app 的代码被打进 PyInstaller 的 PYZ 归档，运行时
+      `__file__` = `<exe目录>\\_internal\\app\\settings.pyc`，
+      `parents[1]` 正好是 **`_internal`** ——所以 `ROOT / 'projects'`
+      会落在 `_internal\\projects`。
+
+      而用户升级时最常见的动作就是「覆盖解压」，`_internal` 整个被替换，
+      **用户几百个项目一次性没了**。这不是理论风险：`build_exe.py` 建了
+      exe 旁的空 `projects\\` 并在注释里写着「项目放这里，换电脑拷走跟着走」，
+      但程序从来不读它 —— 那段注释一直是假的。
+
+    exe 旁边不可写（比如装在 Program Files）就返回 None，让调用方回退，
+    不要在这里抛异常把程序搞起不来。
+    """
+    if not _frozen():
+        return None
+    if 'path' in _portable_cache:
+        return _portable_cache['path']
+    try:
+        exe_dir = Path(sys.executable).resolve().parent
+    except OSError:
+        return None
+    target = exe_dir / 'projects'
+    try:
+        target.mkdir(exist_ok=True)
+        probe = target / '.writable'
+        probe.write_bytes(b'ok')
+        probe.unlink()
+    except OSError:
+        target = None
+    _portable_cache['path'] = target
+    return target
+
+
+def _adopt_bundle_projects(portable: Path) -> None:
+    """打包版：把旧版本误存进 `_internal\\projects` 的项目搬到 exe 旁边。
+
+    只在「exe 旁边还没有任何真实项目」时才动 —— 新位置已经有东西就一律不碰，
+    避免把用户的项目搞混。
+
+    ★ 用 `Path.rename`（同一块盘上是原子的 rename），不做「复制 + 删」：
+      要么改名成功，要么原样不动，不会出现搬一半的残缺目录。
+      `_internal` 和 exe 必定同盘，所以这里一定是原子 rename。
+    """
+    try:
+        legacy = ROOT / 'projects'
+        if legacy.resolve() == portable.resolve() or not legacy.is_dir():
+            return
+        for item in portable.iterdir():
+            if item.is_dir() and (item / 'project.json').is_file():
+                return                                  # 新位置已有真实项目，不动
+        moved = 0
+        for item in list(legacy.iterdir()):
+            target = portable / item.name
+            if target.exists():
+                continue
+            try:
+                item.rename(target)
+                moved += 1
+            except OSError as exc:
+                log.warning('旧项目搬不过来 %s：%s: %s', item.name, type(exc).__name__, exc)
+        if moved:
+            log.warning('已把 %d 个旧项目从 %s 搬到 %s', moved, legacy, portable)
+    except OSError as exc:
+        log.warning('检查旧项目位置失败：%s: %s', type(exc).__name__, exc)
+
+
 def projects_dir() -> Path:
     """项目数据放在哪。
 
-    没在设置里指定就用 <程序目录>/projects（原来的行为，老用户不受影响）。
+    优先级：
+      1. 设置里显式指定的 `projects_dir`（用户自己改过就尊重他）
+      2. 打包版 → exe 旁的 `projects\\`（不在 `_internal` 里，覆盖升级不丢）
+      3. 源码运行 → `<仓库根>/projects`（原地不动，开发时的老位置）
     """
     raw = str(read().get('projects_dir') or '').strip()
     if raw:
         return Path(raw)
+    portable = _portable_projects_dir()
+    if portable is not None:
+        _adopt_bundle_projects(portable)
+        return portable
     return ROOT / 'projects'

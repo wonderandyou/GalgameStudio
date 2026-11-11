@@ -124,8 +124,25 @@ def report(graph):
     before = structure_problems(normalize_graph(graph))
     result = dict(has_skeleton=has_skeleton(graph), problems_before=len(before),
                   dead_ends_before=len(dead_ends(graph)), problems=before)
-    if not before or not result['has_skeleton']:
+    if not result['has_skeleton']:
         result['repairable'] = False
+        # ★ 必须给出文字原因：只有 repairable=false 一个布尔，用户和前端都只能猜
+        #   「为什么不能修」。三种情况的理由完全不同，要分开说（has_skeleton 要求
+        #   骨架节点和 agent_state.nodes 映射**都**在，缺哪一样修法就不一样）。
+        atoms = skeleton_nodes(graph)
+        refs = (graph.get('agent_state') or {}).get('nodes')
+        if not atoms and not refs:
+            why = ('这张图既没有 agent_state.skeleton.nodes（骨架拓扑），'
+                   '也没有 agent_state.nodes（节点→骨架的映射）')
+        elif not atoms:
+            why = '这张图没有 agent_state.skeleton.nodes（新建项目 / 手工编辑 / 旧版分章产物都没有）'
+        else:
+            why = '这张图有骨架，但缺少 agent_state.nodes（记录每个节点对应骨架哪一步的映射）'
+        result['reason'] = why + '；没有骨架可参照，无法按骨架重建出口'
+        return result, None
+    if not before:
+        result['repairable'] = False
+        result['reason'] = '这张图的结构没有问题（I1–I8 全部通过），不需要修复'
         return result, None
     built, stat = rebuild(graph)
     if built is None:

@@ -12,7 +12,7 @@ from .asset_records import read_records, register, unregister
 from .engine.graph import safe_asset
 from .mock_api import jobs, now
 from .providers.base import ProviderError, audio_seconds
-from .store import atomic_json
+from .store import atomic_json, read_json
 
 
 router = APIRouter(prefix='/api')
@@ -154,6 +154,8 @@ def _rename_reference(pid, ref_id, name, gender, character_id=None):
     if character_id is not None:
         cid = str(character_id or '').strip()
         target['character_id'] = cid
+        # 重新挂上角色 = 用户又想用这张图建角色了，摘掉删除角色时打的标记
+        target.pop('detached', None)
         if cid:
             from .api_characters import _load_graph
             graph, _ready = _load_graph(pid)
@@ -242,12 +244,16 @@ async def update_voice(pid: str, voice_id: str, body: dict):
     return dict(ok=True, voice=item)
 
 
-def _delete_library_item(pid, asset):
+def _delete_library_item(pid, asset, force=0):
     """删掉「全部素材」里的一条。
 
     ★ 这个地方以前根本没有删除入口 —— 「全部素材」是扫磁盘出来的，
       界面上只显示播放器和文件名，删不掉（主人实测）：登录列表能删的只是
       voices.json 里的登记，磁盘上那些没登记的 wav 依然在。
+
+    ★ 正在被台词引用的素材不能悄悄删：删完 graph.json 里还留着这条路径，
+      播放器和导出都会指向 404，而界面上依然显示「这条台词有配音」。
+      默认 409 让用户先决定；force=1 才连台词引用一起清空。
     """
     root = jobs.project_path(pid)
     try:
@@ -256,6 +262,40 @@ def _delete_library_item(pid, asset):
         raise ProviderError('ASSET_INVALID', str(exc), 'library.delete', 422) from exc
     if not target.is_file():
         raise ProviderError('ASSET_NOT_FOUND', '文件不存在', 'library.delete', 404)
+
+    graph_path = root / 'graph.json'
+    graph, used_by = None, []
+    try:
+        graph = read_json(graph_path)
+    except Exception:                                  # noqa: BLE001
+        graph = None
+    if isinstance(graph, dict):
+        for node in graph.get('nodes') or []:
+            if not isinstance(node, dict):
+                continue
+            for line in node.get('lines') or []:
+                if isinstance(line, dict) and line.get('voice') == asset:
+                    used_by.append(node.get('id'))
+    if used_by:
+        if not force:
+            raise ProviderError(
+                'ASSET_IN_USE',
+                f'这条语音还被 {len(used_by)} 处台词使用（例如节点 {used_by[0]}），'
+                '删掉之后那些台词就找不到配音了。确认要删请带 force=1，台词引用会一起清空。',
+                'library.delete', 409, field='asset')
+        # force=1：清掉台词引用，别留下指向已删文件的死链
+        touched_lines = 0
+        for node in graph.get('nodes') or []:
+            if not isinstance(node, dict):
+                continue
+            for line in node.get('lines') or []:
+                if isinstance(line, dict) and line.get('voice') == asset:
+                    line['voice'] = ''
+                    line['dur'] = 0
+                    touched_lines += 1
+        if touched_lines:
+            atomic_json(graph_path, graph)
+
     target.unlink()
     touched = []
     for registry in ('voices.json', 'refs.json'):
@@ -267,29 +307,69 @@ def _delete_library_item(pid, asset):
         if len(kept) != len(items):
             atomic_json(root / registry, dict(version=1, items=kept))
             touched.append(registry)
-    return dict(ok=True, deleted=asset, registries=touched)
+    return dict(ok=True, deleted=asset, registries=touched, cleared_lines=len(used_by))
 
 
 @router.delete('/projects/{pid}/library')
-async def delete_library_item(pid: str, asset: str):
-    """删掉「全部素材」里的一条（磁盘文件 + 对应登记）。"""
-    return await asyncio.to_thread(_delete_library_item, pid, asset)
+async def delete_library_item(pid: str, asset: str, force: int = 0):
+    """删掉「全部素材」里的一条（磁盘文件 + 对应登记）。
+
+    还被台词引用时返回 409；带 `force=1` 才会连台词引用一起清空。
+    """
+    return await asyncio.to_thread(_delete_library_item, pid, asset, force)
 
 
 def _label_by_asset(pid, asset, character_id):
-    """按 asset 路径标注语音是谁的声音；没登记的就补一条登记。"""
+    """按 asset 路径标注语音是谁的声音；没登记的就补一条登记。
+
+    ★ 三个必须在登记前挡住的情况（以前都不挡，素材库里会出现播不了的语音条目）：
+      1. 路径越界（assets/../project.json）—— safe_asset 抛 ValueError，以前没接住 → 500；
+      2. 文件不存在 —— 以前照样登记成 seconds:0, bytes:0；
+      3. 不是 WAV —— 以前把 PNG 也登记成了语音。
+    """
     root = jobs.project_path(pid)
-    target = safe_asset(root, asset)
+    asset = str(asset or '').strip().replace('\\', '/')
+    if not asset.startswith('assets/voice/'):
+        raise ProviderError('ASSET_INVALID', '只能标注 assets/voice/ 下的语音文件',
+                            'voices.label', 422, field='asset')
+    try:
+        target = safe_asset(root, asset)
+    except ValueError as exc:
+        raise ProviderError('ASSET_INVALID', str(exc), 'voices.label', 422, field='asset') from exc
+    if not target.is_file():
+        raise ProviderError('ASSET_NOT_FOUND', f'文件不存在：{asset}',
+                            'voices.label', 404, field='asset')
+    data = target.read_bytes()
+    if data[:4] != b'RIFF' or data[8:12] != b'WAVE':
+        raise ProviderError('NEED_WAV', '当前环境只支持 PCM WAV 语音，这个文件不是 WAV',
+                            'voices.label', 415, field='asset')
+    seconds = audio_seconds(data)
+    # ★ 角色也必须真的存在：以前传一个不存在的 character_id 照样 200，
+    #   在 voices.json 里写进一条指向空气的记录（Grok 实测：char_nobody 也过了）。
+    if character_id:
+        known = []
+        graph_path = root / 'graph.json'
+        if graph_path.is_file():
+            try:
+                known = [str(c.get('id')) for c in (read_json(graph_path).get('characters') or [])
+                         if isinstance(c, dict)]
+            except Exception:                          # noqa: BLE001
+                known = []
+        if str(character_id) not in known:
+            raise ProviderError('CHARACTER_NOT_FOUND',
+                                f'角色不存在：{character_id}（先建角色，再给它标语音）',
+                                'voices.label', 404, field='character_id')
     items = read_records(root, 'voices.json')
     for item in items:
         if item.get('asset') == asset:
             item['character_id'] = character_id
+            if not item.get('seconds'):
+                item['seconds'] = seconds
             atomic_json(root / 'voices.json', dict(version=1, items=items))
             return item
     import uuid as _uuid
     item = dict(id='voi_' + _uuid.uuid4().hex, character_id=character_id, label='',
-                asset=asset, seconds=0,
-                bytes=target.stat().st_size if target.is_file() else 0,
+                asset=asset, seconds=seconds, bytes=len(data),
                 created_at=now())
     items.append(item)
     atomic_json(root / 'voices.json', dict(version=1, items=items))

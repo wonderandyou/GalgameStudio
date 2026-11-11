@@ -225,7 +225,7 @@ class ApiTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.tmp = Path(temporary.name)
         (self.tmp / 'projects').mkdir()
-        self.manager = mock_api.Jobs(self.tmp)
+        self.manager = mock_api.Jobs(self.tmp, projects_root=self.tmp / 'projects')
         for replacement in (patch.object(mock_api, 'jobs', self.manager),
                             patch.object(mock_api, 'MOCK', True),
                             patch.object(self.manager, 'projects_root', lambda: self.tmp / 'projects')):

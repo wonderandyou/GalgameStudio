@@ -1,7 +1,9 @@
 """接收项目请求，持久化生成模式与检查点，并用 SSE 回放进度。"""
 import asyncio
 import copy
+import ctypes
 import json
+import logging
 import os
 import re
 import shutil
@@ -32,8 +34,16 @@ from .engine.export_mock import export_game, ensure_assets, take_missing_assets
 from .engine.contracts import stage_report
 from . import ui_presets
 
+log = logging.getLogger(__name__)
+
 # 同一个 Unity 工程同时只能跑一个构建：两次并发构建会互相覆盖 Assets\StreamingAssets
 UNITY_BUILD_LOCK = asyncio.Lock()
+
+
+@asynccontextmanager
+async def _noop_lock():
+    """空锁：Unity 分支用它占位（它自己有 UNITY_BUILD_LOCK，不需要 admission）。"""
+    yield
 
 router = APIRouter(prefix='/api')
 
@@ -45,10 +55,89 @@ def now():
     return datetime.now(timezone.utc).isoformat()
 
 
-def gate_graph(graph, source):
-    """D3 写入门的 HTTP 包装：任何落盘前都过 apply_graph；被拒时 422 + **全部** problems。"""
+def _proc_start_time(pid):
+    """取某个进程的创建时间（100ns 单位的整数）。拿不到一律返回 None = 当作已死。
+
+    ★★ 为什么必须有这一项（2026-11-11，第三轮验证 P1-A）：
+      光看「pid 还存不存在」不够 —— Windows 会把 pid 复用给新进程。
+      一条 job 记着 pid=1234，原来那个进程早死了，pid 又被一个无关进程拿走，
+      只看 pid 就会判成「还活着」→ 那条 job 永远卡在 running，谁都不去收它。
+
+      创建时间精确到 100ns，同一个 pid 换了进程它必变，所以
+      「pid 存在 + 创建时间一致」才等于「还是原来那个进程」。
+
+    权限不够 / 进程不存在 / 非 Windows 没有 /proc 时都返回 None，
+    调用方据此判定「已死」—— 宁可把别人的任务误标成中断（能续跑），
+    也不要把它永远挂在「进行中」（用户看到的就是卡死）。
+    """
+    if not hasattr(ctypes, 'WinDLL'):                       # 非 Windows：退到 /proc
+        try:
+            stat = Path(f'/proc/{int(pid)}/stat').read_text('utf-8', 'replace')
+            return int(stat.rsplit(') ', 1)[1].split()[19])
+        except Exception:                                   # noqa: BLE001
+            return None
+    from ctypes import wintypes
+    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+    handle = kernel32.OpenProcess(0x1000, False, int(pid))  # QUERY_LIMITED_INFORMATION
+    if not handle:
+        return None
     try:
-        return apply_graph(graph, source=source)
+        created, exited, kernel, user = (wintypes.FILETIME() for _ in range(4))
+        if not kernel32.GetProcessTimes(handle, ctypes.byref(created), ctypes.byref(exited),
+                                        ctypes.byref(kernel), ctypes.byref(user)):
+            return None
+        # ★★ 关键，实测踩过（2026-11-11）：**进程退出后只要还有别人持有它的句柄，
+        #    进程对象就还在** —— OpenProcess 照样成功、GetProcessTimes 照样返回
+        #    原来的创建时间。只看「拿得到时间」会把死进程判成活进程，
+        #    于是那条 job 永远收不掉。必须再看退出码。
+        code = wintypes.DWORD()
+        if not kernel32.GetExitCodeProcess(handle, ctypes.byref(code)):
+            return None
+        if code.value != 259:                               # STILL_ACTIVE
+            return None
+        return (created.dwHighDateTime << 32) | created.dwLowDateTime
+    except Exception:                                       # noqa: BLE001
+        return None
+    finally:
+        try:
+            kernel32.CloseHandle(handle)
+        except Exception:                                   # noqa: BLE001
+            pass
+
+
+_OWNER_STAMP = {}
+
+
+def _owner_stamp():
+    """本进程的持有者标记：(pid, 进程创建时间)。整个进程只取一次。"""
+    if 'value' not in _OWNER_STAMP:
+        pid = os.getpid()
+        _OWNER_STAMP['value'] = (pid, _proc_start_time(pid))
+    return _OWNER_STAMP['value']
+
+
+def _job_owner_alive(job):
+    """这条 job 是不是**另一个确实还活着的进程**正在跑。
+
+    ★ 没有 owner_started 的老 job 一律当「已死」：
+      旧版本写的 job 文件没有这两个字段，没法确认它属于谁。
+      宁可标成中断（用户能续跑），也不能让状态永远挂在「进行中」。
+    """
+    pid = job.get('owner_pid')
+    started = job.get('owner_started')
+    if not isinstance(pid, int) or pid <= 0 or not isinstance(started, int):
+        return False
+    return _proc_start_time(pid) == started
+
+
+def gate_graph(graph, source, previous=None):
+    """D3 写入门的 HTTP 包装：任何落盘前都过 apply_graph；被拒时 422 + **全部** problems。
+
+    `previous` 传磁盘上那份旧图时，会额外启用「改坏护栏」：
+    旧图合法、这次提交把它改成不合法 → 422（防止编辑器把好图存成坏图）。
+    """
+    try:
+        return apply_graph(graph, source=source, previous=previous)
     except GraphRejected as exc:
         error = ProviderError('GRAPH_REJECTED', str(exc), source, 422)
         error.payload['problems'] = exc.problems
@@ -71,11 +160,22 @@ class Params(BaseModel):
     key_branches: int = Field(default=2, ge=1, le=10)
     flavor_branches: int = Field(default=8, ge=0, le=200)
     branch_depth: int = Field(default=2, ge=0, le=8)
-    # §4.3 骨架模式的形状参数：选择点密度、章数、结局数（flavor_branches 只在 legacy 分章模式起作用）。
+    # §4.3 骨架模式的形状参数：选择点密度、章数、结局数。
+    # flavor_branches 现在在**骨架模式也生效**（原来只对 legacy 分章模式起作用）：
+    # outline.build_template 会按它往主线插入「只换对话、最后汇合」的旁支，
+    # 数量受 choice_density 的 I9 上限约束，排不下会写 structure_warnings 并打 warn 日志。
     choice_density: float = Field(default=0.06, gt=0, le=0.2)
     chapters: int = Field(default=9, ge=1, le=60)
-    endings: int = Field(default=4, ge=1, le=4)
+    endings: int | None = Field(default=None, ge=1, le=4)
+    # ★ 默认 None 而不是 4：界面上「必要分支」那个滑块的文案是「定结局数」，
+    #   没单独指定结局数时就该按必要分支数来（见 generate_skeleton）。
+    #   写死 4 会让 key_branches=1 的项目也生成 4 个结局，滑块等于摆设。
     auto_voice: bool = True
+    # ★ 能不能不跑美术：以前 `Params` 里只有 auto_voice 这个开关，没有 art 的，
+    #   于是「只想联调文本」也必然真调千问生图 —— 实测一次 12 节点小项目就烧掉
+    #   7 张背景图的钱（Kimi 测出来时已超「每接口 2 次」的红线）。
+    #   关掉之后图全部走占位，不碰任何生图接口。
+    auto_art: bool = True
     consistency: bool = True
     # 生成完之后进入逐节点过审：每个节点要用户点「通过」或「驳回并写理由」。
     # 结果写在 node.review 上，下次生成不会覆盖已通过的节点。
@@ -96,6 +196,25 @@ class Generate(BaseModel):
 def minutes_for_nodes(count):
     """节点数换算成目标时长（分钟），口径要和生成接口一致。"""
     return max(1, round(count / NODES_PER_MINUTE))
+
+
+def merge_characters(kept, base):
+    """按 id 合并角色表：**用户手工建的优先**，骨架默认的补在后面。
+
+    用于「重写整张图」的路径（重新生成 / 参数不一致清空重写）：
+    骨架只带 heroine，不合并就等于把用户建好的角色删了。
+    同 id 时保留 kept 那份 —— 用户可能改过名字 / 音色 / 参考图。
+    """
+    out, seen = [], set()
+    for item in list(kept or []) + list(base or []):
+        if not isinstance(item, dict):
+            continue
+        cid = item.get('id')
+        if not cid or cid in seen:
+            continue
+        seen.add(cid)
+        out.append(item)
+    return out
 
 
 def resume_signature(value):
@@ -148,9 +267,19 @@ def mock_notice():
     return 'GAL_MOCK=1：使用内置模拟模型，不调用外部供应商'
 
 class Jobs:
-    def __init__(self, root=ROOT):
-        """初始化任务状态：事件列表、状态、参数快照。"""
+    def __init__(self, root=ROOT, projects_root=None):
+        """初始化任务状态：事件列表、状态、参数快照。
+
+        `root` 是**状态目录**（`.jobs` / 备份等）。项目数据目录默认跟着本机设置走。
+
+        ★ `projects_root` 用来显式隔离项目目录，**单元测试必须传**。
+          不传的话 `POST /api/projects` 会真的往用户的 `projects\` 里建项目 ——
+          Grok 实测：跑一次全量单测就会在那里留下一个空的 `p_xxxx` 目录。
+        """
         self.root = Path(root)
+        self._projects_root = Path(projects_root) if projects_root else None
+        if self._projects_root is not None:
+            self._projects_root.mkdir(parents=True, exist_ok=True)
         self.jobs = {}
         self.tasks = {}
         # 每个项目一份 Journal，按目录缓存 —— 序号要连续，不能每次 new 一个。
@@ -180,6 +309,7 @@ class Jobs:
         主人 2026-11-08 就是这么丢掉「了」这个项目的 7 章 / 135 节点的。
         events 一个就几十万字符，回填时清空（判定用不到）。
         """
+        self._sweep_deleted()
         folder = self.root / '.jobs'
         if not folder.is_dir():
             return
@@ -192,6 +322,15 @@ class Jobs:
                 self.jobs[job['id']] = dict(job, events=[])
             if job.get('status') not in ('queued', 'running'):
                 continue
+            # ★ 别的实例正在跑的任务不能动（第三轮验证 P1-A）：
+            #   `import app.main` 就会构造全局 Jobs() 并跑到这儿。以前是无差别收割，
+            #   于是任何一方重启、甚至在仓库里跑一次 unittest，都会把另一个实例
+            #   真正在生成的任务标成 INTERRUPTED —— 那条项目的「忙时不许删」保护
+            #   随之失效，用户能删掉一个还在写的项目，留下残缺目录。
+            if _job_owner_alive(job):
+                log.info('任务 %s 属于另一个还在运行的实例（pid=%s），不动它',
+                         job.get('id'), job.get('owner_pid'))
+                continue
             job['status'] = 'failed'
             job['error'] = dict(
                 code='INTERRUPTED',
@@ -203,6 +342,29 @@ class Jobs:
                 atomic_json(path, job)
             except Exception:                                  # noqa: BLE001
                 pass
+
+    def _sweep_deleted(self):
+        """清掉上次删除残留的 `.deleted-*` 目录。
+
+        `delete_project` 是「先整体原子改名成 `.deleted-<id>-<ts>`，再删内容」——
+        改名成功后项目已经从列表消失，但内容可能因为文件被占用删不干净，
+        于是留下一个点开头的垃圾目录。启动时扫一遍把它们清掉。
+        （以前 delete 的注释就写着「下次启动清理」，但根本没有这段代码，
+          Grok 查出来的。现在真的有了。）
+        """
+        try:
+            base = self.projects_root()
+        except Exception:                                  # noqa: BLE001
+            return
+        if not base.is_dir():
+            return
+        for path in base.glob('.deleted-*'):
+            if not path.is_dir():
+                continue
+            try:
+                shutil.rmtree(path)
+            except OSError as exc:
+                log.warning('残留的删除目录清不掉 %s：%s: %s', path, type(exc).__name__, exc)
 
     def journal(self, root):
         """取某个项目的运行日志（按目录缓存，保证序号连续）。"""
@@ -298,7 +460,12 @@ class Jobs:
         return info
 
     def projects_root(self):
-        """项目数据目录。跟着设置走：设置里改了保存位置，这里就换。"""
+        """项目数据目录。跟着设置走：设置里改了保存位置，这里就换。
+
+        测试里可以用 `Jobs(..., projects_root=...)` 把它隔离到临时目录。
+        """
+        if self._projects_root is not None:
+            return self._projects_root
         return app_settings.projects_dir()
 
     def project_path(self, project_id):
@@ -368,27 +535,52 @@ class Jobs:
         await self.emit(job, 'agent', dict(agent=agent, state=state, progress=progress, msg=msg))
 
     def require_idle(self, project_id):
-        """没有任务在跑时才允许写图 —— 防并发写坏。"""
+        """没有任务在跑时才允许写图 —— 防并发写坏。
+
+        ★ 导出类 job 不算「忙」：产物的落盘是**同步**做完的（export 接口里
+        export_game 已经返回、文件都在了），那个 job 只负责登记 SSE 收尾。
+        以前它也会把人挡在外面，于是「导出 renpy 成功、马上导出 web」会莫名其妙
+        吃一次 409 PROJECT_BUSY，等一会重试才好。写盘本身由 export 的 admission
+        串行化，所以放过导出的收尾 job 是安全的。
+        """
         if any(j['project_id'] == project_id and j['status'] in ('queued', 'running')
+               and not j.get('exported')
                for j in self.jobs.values()):
             raise ProviderError('PROJECT_BUSY', '项目已有运行任务', 'jobs.submit', 409)
 
-    async def submit(self, project_id, kind, body, *, warning=None, exported=False):
-        """新建一个任务并排队。"""
+    async def submit(self, project_id, kind, body, *, warning=None, exported=False, lockless=False):
+        """新建一个任务并排队。
+
+        `lockless=True` 给**已经持有 `admission`** 的调用方用 ——
+        asyncio.Lock 不可重入，导出接口把「闲忙检查 + 写盘 + 登记 job」
+        放在同一个 admission 块里，所以它必须走这条路，否则自己把自己锁死。
+        """
+        if lockless:
+            return await self._register_job(project_id, kind, body,
+                                           warning=warning, exported=exported)
         async with self.admission:
-            self.project_path(project_id)
-            self.require_idle(project_id)
-            job_id = 'j_' + uuid.uuid4().hex
-            job = dict(id=job_id, project_id=project_id, kind=kind, body=body, status='queued',
-                       events=[], stages=[], started=now(), mock_mode=MOCK)
-            if warning:
-                job['warning'] = warning
-            if exported:
-                job['exported'] = True
-            await self.save(job)
-            self.jobs[job_id] = job
-            self.tasks[job_id] = asyncio.create_task(self.run(job))
-            return job
+            return await self._register_job(project_id, kind, body,
+                                            warning=warning, exported=exported)
+
+    async def _register_job(self, project_id, kind, body, *, warning=None, exported=False):
+        """真正建 job 的那步（调用方负责持锁）。"""
+        self.project_path(project_id)
+        self.require_idle(project_id)
+        job_id = 'j_' + uuid.uuid4().hex
+        owner_pid, owner_started = _owner_stamp()
+        # owner_* 是「谁在跑这条任务」的凭据：别的实例 reap_orphans 时靠它判断
+        # 这条 job 该不该被标成中断（见 _job_owner_alive）。
+        job = dict(id=job_id, project_id=project_id, kind=kind, body=body, status='queued',
+                   events=[], stages=[], started=now(), mock_mode=MOCK,
+                   owner_pid=owner_pid, owner_started=owner_started)
+        if warning:
+            job['warning'] = warning
+        if exported:
+            job['exported'] = True
+        await self.save(job)
+        self.jobs[job_id] = job
+        self.tasks[job_id] = asyncio.create_task(self.run(job))
+        return job
 
     async def run(self, job):
         """任务主循环：跑流水线、写事件、收尾改状态。"""
@@ -459,10 +651,17 @@ class Jobs:
             #   以前是直接抹掉：实测把「了」这个项目的 7 章 135 节点清成了 0
             #   （主人 2026-11-08 22:20 踩到）。现在清空前先落一份快照，出事能捞回来。
             existing_nodes = len(graph.get('nodes') or [])
-            done_count = sum(1 for act in (graph.get('agent_state') or {}).get('acts', [])
+            state_now = graph.get('agent_state') or {}
+            done_count = sum(1 for act in (state_now.get('acts') or [])
                              for chapter in act.get('chapters', [])
                              if chapter.get('status') == 'done')
-            if existing_nodes > 1 or done_count:
+            # ★ 判「真的做过内容」**不能看 node.status**：新建项目的骨架节点本来就被
+            #   写成 `status='done'`（见 app/mock_data.py:43），拿它当判据等于恒真，
+            #   于是第一次生成照样弹「会清空重写（原有 0 章 / 2 节点）」吓用户
+            #   （Grok 实测指出我这个判据是错的）。
+            #   可靠信号只有两个：生成器留下过 skeleton，或旧版分章模式有完成的章节。
+            has_skeleton = bool(state_now.get('skeleton'))
+            if has_skeleton or done_count:
                 stamp = time.strftime('%Y%m%d-%H%M%S')
                 backup = root / ('graph.before-restart-%s.json' % stamp)
                 await asyncio.to_thread(atomic_json, backup, graph)
@@ -472,7 +671,12 @@ class Jobs:
                           f'清空前的图已备份到 {backup.name}')))
             project = await asyncio.to_thread(read_json, root / 'project.json')
             project['resolution'] = job['body']['params']['resolution']
+            # ★ 手工建的角色必须活下来：skeleton() 只带默认 heroine，
+            #   直接 graph = skeleton(...) 会把用户通过 POST /characters 建的角色全冲掉
+            #   （实测：生成前建了一个角色，生成完成后角色表只剩 heroine，只能从备份捞）。
+            kept_characters = list(graph.get('characters') or [])
             graph = skeleton(project)
+            graph['characters'] = merge_characters(kept_characters, graph.get('characters') or [])
             if job['body']['params']['writer_mode'] == 'legacy':
                 graph['nodes'] = graph['nodes'][:1]
                 graph['edges'] = []
@@ -792,7 +996,7 @@ async def read_settings_api():
         ok=True,
         projects_dir=str(app_settings.projects_dir()),
         projects_dir_override=str(cfg.get('projects_dir') or ''),
-        default_projects_dir=str(app_settings.ROOT / 'projects'),
+        default_projects_dir=str(app_settings.projects_dir()),
         data_dir=str(app_settings.data_dir()),
         settings_file=str(app_settings.settings_file()),
         app_root=str(app_settings.ROOT),
@@ -852,12 +1056,24 @@ def _list_projects():
         root = meta_path.parent
         item = dict(meta)
 
-        nodes = []
+        nodes, graph_error = [], None
         try:
             g = read_json(root / 'graph.json')
-            nodes = g.get('nodes') or []
-        except Exception:
-            pass
+            raw = g.get('nodes') or []
+            if not isinstance(raw, list):
+                raise ValueError(f'nodes 应为数组，实际是 {type(raw).__name__}')
+            # ★ 单个项目的 graph.json 被写坏（例如 {"nodes":[null]}）时，
+            #   不能让它把整张项目列表拖成 500 —— 过滤掉坏条目并在该项目上标错误，
+            #   其他项目照常列出、照常从列表打开。
+            bad = [i for i, n in enumerate(raw) if not isinstance(n, dict)]
+            if bad:
+                graph_error = f'graph.json 已损坏：nodes 里有 {len(bad)} 项不是对象（首个在第 {bad[0]} 项）'
+                raw = [n for n in raw if isinstance(n, dict)]
+            nodes = raw
+        except Exception as exc:
+            graph_error = f'graph.json 读不出来：{type(exc).__name__}: {exc}'
+        if graph_error:
+            item['graph_error'] = graph_error
         item['node_count'] = len(nodes)
         item['ending_count'] = sum(1 for n in nodes if n.get('type') == 'ending')
         item['choice_count'] = sum(1 for n in nodes if n.get('type') == 'choice')
@@ -892,14 +1108,49 @@ async def list_projects():
 
 @router.delete('/projects/{project_id}')
 async def delete_project(project_id: str):
-    """删项目（连整个目录一起删，含 assets / export / logs）。"""
+    """删项目（连整个目录一起删，含 assets / export / logs）。
+
+    ★ 分两步走：先把目录**整体原子改名**成隐藏名，再删内容。
+      - 改名成功 → 项目立刻从列表消失，剩下的是清理垃圾，删不干净也不影响用户；
+      - 改名失败 → 说明有文件被独占打开，**原样保留**并 409，用户什么都没丢。
+    原来的写法是 `rmtree(root, ignore_errors=True)`：删到一半遇到被占用的文件就停，
+    异常被吞掉照样返回 200 —— 结果 project.json 没了、graph.json 还在，
+    项目变成「列表里看不到、磁盘上还在、也没法打开」的半死状态。
+    """
     root = jobs.project_path(project_id)      # 内部已校验 p_+32位hex，防路径穿越
     if not root.is_dir():
         raise ProviderError('PROJECT_NOT_FOUND', '项目不存在', 'projects.delete', 404)
     if any(j['project_id'] == project_id and j['status'] in ('queued', 'running')
            for j in jobs.jobs.values()):
         raise ProviderError('PROJECT_BUSY', '项目正在生成，先取消任务再删', 'projects.delete', 409)
-    await asyncio.to_thread(shutil.rmtree, root, True)
+    # 点开头的名字不会被打包的 p_*/project.json 扫描到
+    trash = root.parent / f'.deleted-{root.name}-{int(datetime.now(timezone.utc).timestamp())}'
+    try:
+        await asyncio.to_thread(root.rename, trash)
+    except OSError as exc:
+        raise ProviderError(
+            'PROJECT_BUSY',
+            f'项目里有文件正被别的程序占用，没能删除（{type(exc).__name__}）。'
+            '关掉可能打开着这些文件的程序（编辑器 / 播放器 / 资源管理器预览窗格）再试一次。',
+            'projects.delete', 409) from exc
+    try:
+        await asyncio.to_thread(shutil.rmtree, trash)
+    except OSError as exc:
+        # 已经改名 = 用户那边已经算删掉了。剩下删不干净的目录留到下次启动再清，
+        # 绝对不能回头报「删除失败」，那会让用户以为项目还在。
+        log.warning('项目已移出列表，但残留目录没删干净 %s：%s: %s', trash, type(exc).__name__, exc)
+    # ★ 顺手清掉这个项目的任务记录（第三轮验证 P3-4）：
+    #   以前项目目录删了、`.jobs\j_xxx.json` 还留着，越积越多。
+    #   项目都没了，这些记录也不可能再被拿来续跑，留着只有噪音。
+    for job_id, job in list(jobs.jobs.items()):
+        if job.get('project_id') != project_id:
+            continue
+        jobs.jobs.pop(job_id, None)
+        jobs.tasks.pop(job_id, None)
+        try:
+            jobs.job_path(job_id).unlink(missing_ok=True)
+        except OSError as exc:
+            log.warning('任务记录删不掉 %s：%s: %s', job_id, type(exc).__name__, exc)
     return dict(ok=True, id=project_id)
 
 @router.get('/projects/{project_id}/graph')
@@ -1072,10 +1323,17 @@ async def save_graph(project_id: str, body: dict):
     try:
         Graph.model_validate(body)                       # 字段类型（契约）
     except ValidationError as exc:
-        first = exc.errors()[0]
-        field = '.'.join(str(x) for x in first['loc']) or 'body'
-        raise ProviderError('GRAPH_INVALID', f'graph 结构不符合契约：{field}: {first["msg"]}',
-                            'projects.save', 422, field=field) from exc
+        # ★ 一次列出**全部**字段错误：只报第一条的话，用户得提交一次改一处，
+        #   一副要改十几次。'loc' 是字段路径，'msg' 是 pydantic 的原始说明。
+        problems = [f'{".".join(str(x) for x in item["loc"]) or "body"}：{item["msg"]}'
+                    for item in exc.errors()]
+        shown = '；'.join(problems[:20]) + (f' …等 {len(problems)} 项' if len(problems) > 20 else '')
+        field = '.'.join(str(x) for x in exc.errors()[0]['loc']) or 'body'
+        error = ProviderError('GRAPH_INVALID',
+                              f'graph 结构不符合契约（共 {len(problems)} 项）：{shown}',
+                              'projects.save', 422, field=field)
+        error.payload['problems'] = problems
+        raise error from exc
     body.pop('chapters', None)  # GET 的章节视图由服务器从检查点生成。
     async with jobs.admission:
         jobs.require_idle(project_id)
@@ -1088,7 +1346,9 @@ async def save_graph(project_id: str, body: dict):
             state.pop('job_id', None)
             body['agent_state'] = state
         # 语义不变量 I1–I8：必须在拼回 agent_state 之后判 —— 有没有 skeleton 决定严格还是宽松。
-        body = gate_graph(body, 'api.save')
+        # 同时把磁盘旧图传进去：旧图合法就禁止被改坏（否则删个起始节点出口就能存进去，
+        # 之后导出直接 409 GRAPH_NOT_READY，且无骨架时按骨架修复也救不回来）。
+        body = gate_graph(body, 'api.save', previous=saved)
         await jobs.persist(atomic_json, root / 'graph.json', body)
     return dict(ok=True)
 
@@ -1161,6 +1421,12 @@ async def export(project_id: str, body: Export):
     root = jobs.project_path(project_id)
     if body.format == 'video':
         raise ProviderError('EXPORT_NOT_SUPPORTED', 'M2 支持 renpy/web，尚未实现录像', 'export.start', 501, field='format')
+    # ★ 闲忙检查必须在校验 / 写盘**之前**。
+    #   旧顺序是「先 export_game() 同步落盘 → 再 jobs.submit() 里才 require_idle」，
+    #   于是并发的第二次导出返回 409 PROJECT_BUSY，但 export/web/ 里那一整套产物
+    #   （index.html / play.html / assets / export_report.json）已经写完了：
+    #   前端按 r.ok 判成败，用户看到报错就去重试，反复覆盖产物，任务历史还跟磁盘对不上。
+    jobs.require_idle(project_id)
     graph = await asyncio.to_thread(read_json, root / 'graph.json')
     # 先补缺失素材再校验：降级路径（没配 key、art/voice 没跑）会留下
     # 「图里写着有、磁盘上没有」的素材，validate_graph 会先把导出拦死。
@@ -1175,34 +1441,44 @@ async def export(project_id: str, body: Export):
     # 前端拿到 out 后会立刻打开/校验文件，若只提交异步 job，返回瞬间目录还不存在。
     # job 仍会登记并发 SSE 事件（重复导出幂等，仅覆盖同名文件）。
     out_path = root / 'export' / body.format
-    try:
-        if body.format == 'unity':
-            # 同一个 D:\UnityProject 同时只能跑一个构建 —— 串行化，否则两次构建互相踩。
-            # 构建可能几十秒到十几分钟，asyncio.to_thread 不阻塞事件循环，但这次请求会等。
-            async with UNITY_BUILD_LOCK:
+    # 非 Unity 分支：写盘 + 登记 job 必须在同一个 admission 块里，
+    # 否则两次并发请求能双双通过 require_idle 再各自写盘（admission 不可重入，
+    # 所以 submit 走 lockless=True）。
+    span = jobs.admission if body.format != 'unity' else _noop_lock()
+    async with span:
+        # ★ 进锁**再查一次**：上面那次是非原子的快检，两次并发请求可能都通过。
+        #   这次在 admission 里面，配合下面写盘 + 登记，整体是原子的 ——
+        #   要么完整导出并登记 job，要么 409 且磁盘一个字节都不动。
+        jobs.require_idle(project_id)
+        try:
+            if body.format == 'unity':
+                # 同一个 D:\UnityProject 同时只能跑一个构建 —— 串行化，否则两次构建互相踩。
+                # 构建可能几十秒到十几分钟，asyncio.to_thread 不阻塞事件循环，但这次请求会等。
+                async with UNITY_BUILD_LOCK:
+                    result = await asyncio.to_thread(
+                        export_game, root, graph, body.format, missing=filled)
+            else:
                 result = await asyncio.to_thread(
-                    export_game, root, graph, body.format)
-        else:
-            result = await asyncio.to_thread(
-                export_game, root, graph, body.format)
-    except RuntimeError as exc:
-        # Unity 构建失败：消息里已含 Unity 日志尾部，原样回给前端
-        raise ProviderError('UNITY_BUILD_FAILED', str(exc), 'export.unity', 500) from exc
-    except ValueError as exc:
-        raise ProviderError('GRAPH_NOT_READY', str(exc), 'export.unity', 409) from exc
-    except OSError as exc:
-        raise ProviderError('STATE_NOT_WRITABLE',
-                            f'{out_path}: {type(exc).__name__}: {exc}', 'export.write', 500) from exc
-    # Unity 分支的产物不在 export/unity 下，而是 Unity 工程里的 exe —— 用真实路径回报
-    if isinstance(result, dict) and result.get('out'):
-        out_path = Path(result['out'])
-    # 降级路径下有些素材图从来没生成过，导出时已用占位图补上 —— 要如实告诉用户哪几张是占位。
-    filled = filled + take_missing_assets()
-    warning = None
-    if filled:
-        shown = ', '.join(filled[:5]) + (f' 等 {len(filled)} 个' if len(filled) > 5 else '')
-        warning = f'导出时有素材缺失，已用占位图补上：{shown}'
-    job = await jobs.submit(project_id, 'export', body.model_dump(), warning=warning, exported=True)
+                    export_game, root, graph, body.format, missing=filled)
+        except RuntimeError as exc:
+            # Unity 构建失败：消息里已含 Unity 日志尾部，原样回给前端
+            raise ProviderError('UNITY_BUILD_FAILED', str(exc), 'export.unity', 500) from exc
+        except ValueError as exc:
+            raise ProviderError('GRAPH_NOT_READY', str(exc), 'export.unity', 409) from exc
+        except OSError as exc:
+            raise ProviderError('STATE_NOT_WRITABLE',
+                                f'{out_path}: {type(exc).__name__}: {exc}', 'export.write', 500) from exc
+        # Unity 分支的产物不在 export/unity 下，而是 Unity 工程里的 exe —— 用真实路径回报
+        if isinstance(result, dict) and result.get('out'):
+            out_path = Path(result['out'])
+        # 降级路径下有些素材图从来没生成过，导出时已用占位图补上 —— 要如实告诉用户哪几张是占位。
+        filled = filled + take_missing_assets()
+        warning = None
+        if filled:
+            shown = ', '.join(filled[:5]) + (f' 等 {len(filled)} 个' if len(filled) > 5 else '')
+            warning = f'导出时有素材缺失，已用占位图补上：{shown}'
+        job = await jobs.submit(project_id, 'export', body.model_dump(), warning=warning,
+                                exported=True, lockless=body.format != 'unity')
     # ui/api.js 的 exportProject 用 `r.ok` 判成败、用 `r.out` 显示路径。
     return dict(ok=True, job_id=job['id'], out=str(out_path), pipeline=stage_report(graph),
                 warnings=[f'素材缺失，已用占位图：{f}' for f in filled])
@@ -1260,6 +1536,8 @@ async def design_ui(project_id: str, body: UiDesign):
                     notes=preset['notes'], file=str(preset_file)),
         screens=rendered,
         analysis=dict(colors=list(design.get('colors') or []),
+                      color_words=list(design.get('color_words') or []),
+                      image_colors=list(design.get('image_colors') or []),
                       matched=list(design.get('matched') or []),
                       contrast=design.get('contrast'),
                       references_used=design.get('references_used', 0)),

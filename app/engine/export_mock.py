@@ -126,11 +126,19 @@ def export_renpy(root, graph):
         names[key] = name
         return name
 
+    copied = set()
+
     def register(asset, kind):
-        """登记并复制到 game/images/<kind>/<name>.png。"""
+        """登记并复制到 game/images/<kind>/<name>.png。
+
+        ★ 必须**无条件覆盖**：上次导出留下的同名文件可能是旧图，
+        而 script.rpy 引用的就是 images/<kind>/<name>.png —— 不覆盖就会永远显示旧图
+        （用户换了 assets/bg/x.png 再导出，成品里还是上一版）。
+        """
         name = image_name(asset, kind)
         target = game / 'images' / kind / (name + '.png')
-        if not target.is_file():
+        if (kind, asset) not in copied:
+            copied.add((kind, asset))
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(_png_source(root, asset), target)
         return name
@@ -152,7 +160,10 @@ def export_renpy(root, graph):
         used_ident.add(ident)
         char_ident[character['id']] = ident
 
-    lines = ["# 自动生成：M2 mock 工程（纯色 PNG + 静音 WAV，仅用于协议联调）", ""]
+    # 头注释要说实话：真后端导出的成品不该自称「M2 mock 工程」（Kimi 实测指出）。
+    # 到底有没有降级、降级在哪一段，由同目录的 export_report.json 记录。
+    lines = ["# 由 奇迹工坊 GalgameStudio 自动生成（Ren'Py 工程）",
+             "# 降级与占位情况见 export_report.json", ""]
     for character in graph['characters']:
         ident = char_ident[character['id']]
         lines.append(f'define {ident} = Character({_escape(character["name"])}, '
@@ -311,8 +322,13 @@ if(index<node.lines.length-1)button('下一句',()=>{index++;render()});else if(
     return output
 
 
-def export_game(root, graph, format, preset=None):
-    """导出可玩工程，另存生成阶段的交付和降级情况。"""
+def export_game(root, graph, format, preset=None, missing=()):
+    """导出可玩工程，另存生成阶段的交付和降级情况。
+
+    `missing` 是**导出阶段**补上占位图的素材清单（`ensure_assets` 的返回）。
+    必须写进报告：只看交付目录的人（验收者 / 接手的人）没法知道
+    「这几张图其实是导出时才补的占位图」，光靠接口返回的 warnings 会漏。
+    """
     report = stage_report(graph)
     failed = [stage for stage in ('writer', 'art', 'voice', 'build')
               if report['stages'].get(stage) == 'failed']
@@ -329,5 +345,14 @@ def export_game(root, graph, format, preset=None):
         output = Path(result['out']).parent
     else:
         result = output = export_web(root, public, preset=preset)
+    placeholders = sorted(set(missing or ()))
+    if placeholders:
+        entry = dict(stage='export', placeholder_assets=placeholders,
+                     count=len(placeholders))
+        prior = report['degraded'].get('art')
+        report['degraded']['art'] = [prior, entry] if prior else entry
+        note = f'导出时有 {len(placeholders)} 个素材缺失，已用占位图补上'
+        old = report['impacts'].get('art') or ''
+        report['impacts']['art'] = f'{old}；{note}' if old else note
     atomic_json(output / 'export_report.json', dict(format=format, **report))
     return result

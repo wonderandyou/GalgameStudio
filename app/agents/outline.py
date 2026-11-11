@@ -1,6 +1,7 @@
 """由代码构造全图拓扑，再分批请模型填写剧情文案。"""
 
 import json
+import math
 import re
 from collections import Counter
 
@@ -118,20 +119,22 @@ def _leg_lengths(diamonds, branch_len):
 
 
 def plan_template(*, target_nodes, depth, endings=None, choice_density=CHOICE_DENSITY,
-                  branch_len=BRANCH_LEN, depth_max=DEPTH_MAX):
+                  branch_len=BRANCH_LEN, depth_max=DEPTH_MAX, diamonds=None):
     """§4.4 先算数，再建图：返回 (结局数, 是否有最终分歧, 菱形数, 各菱形侧枝长度, 主干场景数)。
 
     形状（§4.2）：主干 ─ choice ─┬─ 侧枝 A（L 个场景）─┐
                                  └─ 侧枝 B（L 个场景）─┴─ 汇合场景 ─ 主干 …
     每个菱形占 1 + 2L + 1 个节点；结局只挂在主干末尾的最终分歧（kind=key）上（§4.5）。
     选择点总数 = round(total × density)，最终分歧也算一个；小图至少允许 1 个。
+    diamonds 给了就用它当「想要的菱形数」（P2-3：必要 + 气氛分支数），仍受下面的节点预算收缩。
     """
     ending_count = _ending_count(target_nodes, depth, endings)
     final_choice = int(ending_count > 1)
     budget = target_nodes - 1 - ending_count - final_choice
-    diamonds = 0
+    wanted, diamonds = diamonds, 0
     if depth and depth_max:
-        diamonds = max(0, round(target_nodes * choice_density) - final_choice)
+        diamonds = max(0, round(target_nodes * choice_density) - final_choice
+                       if wanted is None else int(wanted))
     low = branch_len[0]
     # 预算不够就先把侧枝压到最短，再减少菱形数 —— 永远不会建完再发现超出目标。
     while diamonds and diamonds * (2 * low + 2) > budget:
@@ -150,16 +153,48 @@ def build_template(*, target_nodes, depth, endings=None, requirement='',
                    rejoin_max=REJOIN_MAX, depth_max=DEPTH_MAX):
     """用「主干 + 会汇合的侧枝」构造整图：节点数恰好等于 target_nodes，每条侧枝必然汇合。
 
-    key_branches 只决定菱形里有几个标成 key（记旗标、改结局倾向），不改变形状；
-    flavor_branches 保留参数兼容旧调用，选择点数量一律由 choice_density 决定。
+    key_branches 只决定菱形里有几个标成 key（记旗标、改结局倾向），不改变形状。
+    flavor_branches（P2-3，「气氛分支」滑块）：
+      - None（旧调用 / 没传）：和以前一样，菱形数由 choice_density 决定；
+      - 整数 F：菱形数 = 必要菱形（key_branches − 最终分歧）+ F 个气氛菱形（flavor，
+        只换对白、必然汇合回主线、不加结局）。上限两道：I9 选择点 ≤ 节点数 × density × 1.5，
+        以及 target_nodes 节点预算（plan_template 先压侧枝长度再减菱形）。排不下就收缩，
+        并在 meta.structure_warnings 里写明「计划 F 个、实际 X 个」。
     """
     if target_nodes < 2 or depth < 0:
         raise ValueError('骨架至少需要两个节点，分支深度不能为负')
+    key_branches = max(0, key_branches if key_branches is not None else 2)
+    shape_warnings = []
+    wanted = None
+    if flavor_branches is not None:
+        flavor_branches = max(0, int(flavor_branches))
+        if depth and depth_max:
+            final = int(_ending_count(target_nodes, depth, endings) > 1)
+            # I9 与 generator_problems 同口径：choice 数 > max(1, n × density × 1.5) 即违规。
+            # 直接 floor（不加 epsilon），浮点误差只会让上限更保守，不会越界。
+            cap = max(0, math.floor(max(1, target_nodes * choice_density * 1.5)) - final)
+            wanted = min(cap, max(0, key_branches - final) + flavor_branches)
     ending_count, final_choice, diamond_count, lengths, trunk = plan_template(
         target_nodes=target_nodes, depth=depth, endings=endings, choice_density=choice_density,
-        branch_len=branch_len, depth_max=depth_max)
-    key_branches = max(0, key_branches if key_branches is not None else 2)
+        branch_len=branch_len, depth_max=depth_max, diamonds=wanted)
     key_count = min(diamond_count, max(0, key_branches - final_choice))
+    if flavor_branches is not None:
+        placed = diamond_count - key_count
+        if placed < flavor_branches:
+            # ★ 说清具体数字（第三轮验证 P3-5）：原来只说「受密度上限和预算限制」，
+            #   用户看到「计划 8 个、排下 0 个」完全不知道差在哪。
+            #   12 节点这种小项目，I9 只允许 2 个选择点（12×0.12×1.5≈2），
+            #   必要分支一占满，气氛分支就真的一个都放不下 —— 这不是 bug，是硬不变量。
+            if not (depth and depth_max):
+                reason = '分支深度为 0，不插分支'
+            else:
+                ceiling = math.floor(max(1, target_nodes * choice_density * 1.5))
+                reason = (f'这个规模最多只能有 {ceiling} 个选择点'
+                          f'（{target_nodes} 节点 × {choice_density} × 1.5），'
+                          f'其中 {key_count} 个被必要分支占了')
+            shape_warnings.append(
+                f'气氛分支计划 {flavor_branches} 个，实际排下 {placed} 个：{reason}'
+                '（想要更多就加节点数）')
     gap, extra = divmod(trunk, diamond_count + 1)
     chapter_count = max(1, min(chapters, target_nodes // 12 or 1))
     act_count = min(3, chapter_count)
@@ -218,11 +253,13 @@ def build_template(*, target_nodes, depth, endings=None, requirement='',
     for kind in ENDING_KINDS[:ending_count]:
         title, _, summary = ENDING_TEXT[kind]
         tail.to.append(append('ending', title, summary, end_kind=kind).ref)
-    return Skeleton(nodes=nodes, logline=logline, acts=_act_records(nodes),
-                    meta=dict(target_nodes=target_nodes, depth=depth, endings=ending_count,
-                              source='mock', template_version=TEMPLATE_VERSION,
-                              choice_density=choice_density, rejoin_max=rejoin_max,
-                              depth_max=depth_max, branch_len=list(branch_len)))
+    meta = dict(target_nodes=target_nodes, depth=depth, endings=ending_count,
+                source='mock', template_version=TEMPLATE_VERSION,
+                choice_density=choice_density, rejoin_max=rejoin_max,
+                depth_max=depth_max, branch_len=list(branch_len))
+    if shape_warnings:
+        meta['structure_warnings'] = shape_warnings
+    return Skeleton(nodes=nodes, logline=logline, acts=_act_records(nodes), meta=meta)
 
 
 def mock_skeleton(*, target_nodes, depth, endings=None, requirement='', **shape):
@@ -395,9 +432,11 @@ async def _model_skeleton(pipeline, provider, skeleton, *, characters, requireme
 def template_params(params):
     """把生成参数映射到 build_template；没给的用 §4.3 默认值。
 
-    flavor_branches 只对 legacy 分章模式有意义，骨架模式的选择点数一律由 choice_density 决定。
+    P2-3：flavor_branches 也传下去（以前只在 legacy 分章模式生效，骨架模式里是摆设）。
     """
     shape = dict(key_branches=params.get('key_branches'))
+    if params.get('flavor_branches') is not None:
+        shape['flavor_branches'] = params['flavor_branches']
     for name in ('chapters', 'choice_density', 'rejoin_max', 'depth_max'):
         if params.get(name) is not None:
             shape[name] = params[name]
@@ -410,11 +449,22 @@ async def generate_skeleton(pipeline, tools, *, target_nodes, depth, endings=Non
     """先定整图结构，再合入可用文案并校验，模型始终只提供内容。"""
     if endings is None:
         endings = pipeline.params.get('endings')
+    if endings is None:
+        # ★ 「必要分支」滑块的文案是「定结局数」，但骨架模式一直忽略它：
+        #   key_branches 只影响主线分叉数，结局数由 endings 决定，而 endings 默认 4 ——
+        #   结果必要分支设 1 也照样出 4 个结局，滑块等于没有。
+        #   没显式指定结局数时按必要分支数推导；上限 4（end_kind 只有 true/good/bad/alt）。
+        key = pipeline.params.get('key_branches')
+        if key is not None:
+            endings = max(1, min(int(key), 4))
     skeleton = build_template(
         target_nodes=target_nodes, depth=depth, endings=endings, requirement=requirement,
         **template_params(pipeline.params),
     )
     validate_skeleton(skeleton, target_nodes=target_nodes, depth=depth)
+    for warning in skeleton.meta.get('structure_warnings', ()):
+        if warning.startswith('气氛分支计划'):
+            await pipeline.log(warning, 'warn')
     provider = None if MOCK or pipeline.mock else pipeline.providers.get('writer')
     if provider is None:
         return skeleton

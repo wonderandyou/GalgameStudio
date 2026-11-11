@@ -96,6 +96,47 @@ _RADIUS_RULES = (
     (('直角', '硬朗', '方正', '锐利', '冷硬'), '0px'),
 )
 
+#: 颜色词 → (色相0~360, 饱和度0~1, 亮度0~1)。
+#: **长词必须排在短词前面**：「冷蓝」要排在「蓝」前面，否则会被拆成普通蓝。
+#: 以前一张颜色词表都没有 —— 用户写「冷蓝」「霓虹紫」完全无效，配色永远来自
+#: 参考图或 base 预设，于是「怎么写都同一套」（2026-11-11 主人反馈后补上）。
+_COLOR_WORDS = (
+    (('午夜蓝', '藏蓝', '海军蓝', '冷蓝', '深蓝'), 214, 0.55, 0.40),
+    (('天空蓝', '天蓝', '浅蓝', '淡蓝', '水蓝', '湖蓝', 'baby蓝'), 200, 0.52, 0.70),
+    (('蓝紫', '靛'), 240, 0.50, 0.48),
+    (('紫罗兰', '霓虹紫', '赛博紫', '电光紫'), 278, 0.70, 0.60),
+    (('丁香', '薰衣草', '粉紫'), 285, 0.38, 0.72),
+    (('紫', '紫色'), 278, 0.45, 0.50),
+    (('勃艮第', '酒红', '暗红', '血红'), 352, 0.58, 0.30),
+    (('珊瑚', '砖红', '朱红'), 8, 0.62, 0.52),
+    (('红', '赤'), 0, 0.62, 0.48),
+    (('森林绿', '墨绿', '暗绿', '军绿'), 150, 0.48, 0.26),
+    (('薄荷', '青柠', '浅绿'), 155, 0.42, 0.70),
+    (('绿', '翠'), 145, 0.50, 0.44),
+    (('孔雀蓝', '蓝绿', '青碧'), 182, 0.50, 0.46),
+    (('青', '天青'), 185, 0.42, 0.58),
+    (('香槟', '琥珀', '黄铜', '古铜'), 40, 0.55, 0.60),
+    (('金', '黄金', '金色'), 43, 0.62, 0.55),
+    (('柠檬', '鹅黄', '米黄'), 50, 0.70, 0.74),
+    (('暖黄', '暖金', '杏色', '蜜色', '奶黄'), 38, 0.52, 0.72),
+    (('黄',), 52, 0.72, 0.62),
+    (('橙', '橘', '南瓜'), 26, 0.70, 0.54),
+    (('樱花', '蜜桃', '桃粉'), 340, 0.45, 0.76),
+    (('粉', '玫瑰'), 335, 0.50, 0.68),
+    (('咖啡', '木色', '牛皮', '可可'), 28, 0.38, 0.34),
+    (('棕', '褐色'), 28, 0.38, 0.32),
+    (('银灰', '金属灰'), 210, 0.05, 0.62),
+    (('灰', '银', '石灰'), 210, 0.06, 0.52),
+    (('奶油', '米白', '象牙'), 42, 0.18, 0.92),
+    (('米色', '米'), 40, 0.18, 0.86),
+)
+
+#: 颜色的修饰词。只调相应通道，不换色相。
+_DEEPEN = re.compile(r'(深|暗|浓|重|压暗)')
+_LIGHTEN = re.compile(r'(浅|淡|亮|轻|提亮)')
+_MUTED = re.compile(r'(低饱和|灰调|素|柔|莫兰迪|雾)')
+_NEON = re.compile(r'(霓虹|电光|赛博|荧光)')
+
 #: 生成的名字前缀（按 base 预设换，一眼知道是从哪套长出来的）。
 _NAME_PREFIX = {
     'ink-classic': '水墨',
@@ -328,6 +369,13 @@ def _keywords(text):
     for word in _DARK_WORDS + _LIGHT_WORDS + _CHARACTER_WORDS:
         if word in clean and word not in found:
             found.append(word)
+    # 颜色词也算关键词，而且**放到最前面**：预设名字要能体现「冷蓝」「霓虹紫」，
+    # 否则用户改的那两套全叫「纸感定制」，分不清差在哪（2026-11-11）。
+    for names, _hue, _saturation, _lightness in _COLOR_WORDS:
+        hit = next((name for name in names if name in clean), '')
+        if hit and hit not in found:
+            found.insert(0, hit)
+            break                                   # 名字里带一个颜色名就够
     return found
 
 
@@ -419,6 +467,71 @@ def _apply_typo(layout, text):
 
 
 # ------------------------------------------------------------------ 合成预设
+
+def _color_card(rgb, weight):
+    """把 0~1 的 RGB 元组变成和参考图取色同构的色卡。"""
+    hex_value = _rgb_to_hex(tuple(max(0, min(255, int(round(value * 255)))) for value in rgb))
+    parsed = _hex_to_rgb(hex_value) or (0, 0, 0)
+    return dict(hex=hex_value, weight=float(weight),
+                luma=_relative_luma(parsed), saturation=_saturation(parsed))
+
+
+def _text_colors(text):
+    """从文字要求里认出「点名要的颜色」，转成和参考图同构的色卡。
+
+    返回 `(色卡列表, 命中的颜色词)`。最多认两个颜色 —— 三个以上就不像一套配色了。
+
+    ★ 为什么转成色卡而不是直接给一个 hex：
+      `_palette_from_colors` 那套逻辑（最暗做底、最鲜做强调、对比度兜底）
+      已经很成熟，喂同样的结构就能复用，不用另写一套配色推导。
+
+    ★ 为什么一个颜色要生成三档（主色 / 暗版 / 亮版）：
+      只给一个中蓝的话，那套逻辑里 darkest 和 lightest 是同一个色，
+      底色会直接变成一片艳蓝、界面糊掉。给三档它才挑得出来该用哪个当底。
+    """
+    clean = str(text or '')
+    if not clean:
+        return [], [], None
+    picked, words = [], []
+    suggest_dark = None
+    for names, hue, saturation, lightness in _COLOR_WORDS:
+        hit = next((name for name in names if name in clean), '')
+        # ★ 被已命中的长词**包含**就跳过：「霓虹紫」命中后，「紫」不该再来一遍。
+        #   原来是 `hit in words`（列表成员判断），只能挡完全相同的词。
+        if not hit or any(hit in word for word in words):
+            continue
+        words.append(hit)
+        # 修饰词只在颜色名本身不带这个修饰时才叠，避免「深蓝」被加深两层
+        if _DEEPEN.search(clean) and not _DEEPEN.search(hit):
+            lightness = max(0.08, lightness - 0.14)
+        if _LIGHTEN.search(clean) and not _LIGHTEN.search(hit):
+            lightness = min(0.95, lightness + 0.14)
+        if _NEON.search(clean):
+            saturation = min(0.95, saturation + 0.18)
+        if _MUTED.search(clean):
+            saturation = max(0.04, saturation * 0.55)
+        picked.append((hue, saturation, lightness))
+        if suggest_dark is None:
+            # ★ 用**感知亮度**判明暗，不用 _relative_luma：
+            #   后者带 gamma 校正，粉色 / 浅紫这类色天然偏低（樱花算出来 0.461），
+            #   会把「粉嫩可爱」判成暗色，配出一片暗红底（2026-11-11 实测踩到）。
+            suggest_dark = lightness < 0.5
+        if len(picked) >= 2:
+            break
+
+    cards = []
+    for index, (hue, saturation, lightness) in enumerate(picked):
+        weight = 1.0 if index == 0 else 0.62
+        hue_fraction = (hue % 360) / 360.0
+        cards.append(_color_card(colorsys.hls_to_rgb(hue_fraction, lightness, saturation), weight))
+        # 暗版：给深色界面当底，压得很深但保留一点色相
+        cards.append(_color_card(colorsys.hls_to_rgb(
+            hue_fraction, max(0.07, lightness * 0.36), saturation * 0.55), weight * 0.72))
+        # 亮版：给浅色界面当底，几乎退成「带一点色味的白」
+        cards.append(_color_card(colorsys.hls_to_rgb(
+            hue_fraction, min(0.97, lightness + 0.38), saturation * 0.26), weight * 0.72))
+    return cards, words, suggest_dark
+
 
 def _main_colors(colors, min_ratio=0.15, floor=0.02):
     """挑出「够面积」的主色，用来定底色和强调色。
@@ -519,9 +632,17 @@ def analyze(requirement='', references=(), title=''):
 
     text = str(requirement or '').strip()
     matches = match(text) if text else []
-    colors = palette_from_images(references)
+    image_colors = palette_from_images(references)
+    text_cards, color_words, color_dark = _text_colors(text)
+    # ★ 文字点名的颜色排在参考图**前面**（2026-11-11）：
+    #   用户明确说「冷蓝」时，不该被参考图里偶然那片暖色盖过去。
+    colors = text_cards + image_colors
     base_id = _pick_base(matches, text)
     dark = _wants_dark(text)
+    if dark is None and color_dark is not None:
+        # 点了颜色但没说深/浅：跟着那个颜色自己的感知亮度走。
+        # 不然「午夜蓝」会被配成白底浅蓝、「粉嫩樱花」会被配成暗红底。
+        dark = color_dark
     return dict(
         requirement=text,
         title=str(title or '').strip(),
@@ -529,6 +650,8 @@ def analyze(requirement='', references=(), title=''):
         matches=matches,
         base=base_id,
         colors=colors,
+        color_words=color_words,
+        image_colors=image_colors,
         dark=dark,
         font=_pick_font(text),
         radius=_pick_radius(text),
@@ -594,8 +717,10 @@ def compose(requirement='', references=(), base_id='', title=''):
     name = ''.join(name_parts) or '定制界面'
 
     vibe_bits = []
-    if info['colors']:
-        vibe_bits.append('取自参考图的 %d 色' % len(info['colors']))
+    if info['color_words']:
+        vibe_bits.append('你点名的颜色：%s' % '、'.join(info['color_words']))
+    if info['image_colors']:
+        vibe_bits.append('参考图取色 %d 个' % len(info['image_colors']))
     if info['keywords']:
         vibe_bits.append('、'.join(info['keywords'][:3]))
     vibe = '，'.join(vibe_bits) or (base.get('vibe') or '按默认气质生成')
@@ -605,6 +730,12 @@ def compose(requirement='', references=(), base_id='', title=''):
             base['id'], base.get('name') or '', name),
         '参考图只用于取色和判断气质，原图不进成品。',
     ]
+    if info['color_words']:
+        notes.append('配色按你点名的「%s」算出来的；参考图只用来补明暗。'
+                     % '、'.join(info['color_words']))
+        if contrast.get('dark') is False:
+            notes.append('浅色底上浅色强调色读不清，主色会自动调深一点保证可读——'
+                         '想要更艳的版本，要求里写「深色底」或「暗色风」。')
     if contrast.get('contrast'):
         notes.append('正文对比度 %.2f:1（WCAG AA 要求 ≥ %.1f）。'
                      % (contrast['contrast'], MIN_CONTRAST))
@@ -630,6 +761,8 @@ def compose(requirement='', references=(), base_id='', title=''):
             requirement=info['requirement'],
             title=info['title'],
             colors=[item['hex'] for item in info['colors']],
+            color_words=list(info['color_words']),
+            image_colors=[item['hex'] for item in info['image_colors']],
             matched=[dict(id=item['id'], score=item['score'])
                      for item in info['matches'][:3]],
             base=chosen,

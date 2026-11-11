@@ -124,12 +124,18 @@ class Credentials:
         return result
 
     def masked(self):
-        """读出来但把所有凭据字段抹成 `***`。给前端 / 日志用，绝不能把 key 发出去。"""
+        """读出来但把所有凭据字段抹成 `***`。给前端 / 日志用，绝不能把 key 发出去。
+
+        ★★ 空值必须保持空（2026-11-11，第三轮验证 P3-1）：
+          以前不区分数值，一律涂成 `***` → 前端拿到 `***` 就按「已配置」显示，
+          用户明明把密钥清空了，界面还显示有。反过来 `_write` 又把 `***` 当
+          「保持原值」，状态前后对不上。空就是空。
+        """
         result = self.read()
         for cfg in result.values():
-            for key in cfg:
+            for key, value in list(cfg.items()):
                 if any(x in key.lower() for x in ('key', 'token', 'secret', 'password')):
-                    cfg[key] = '***'
+                    cfg[key] = '***' if str(value or '').strip() else ''
         return result
 
     def write(self, patch):
